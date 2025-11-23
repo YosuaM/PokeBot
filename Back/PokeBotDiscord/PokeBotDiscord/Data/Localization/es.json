@@ -1,0 +1,8 @@
+{
+  "Help.Title": "PokeBot Ayuda",
+  "Help.Body": "/help — muestra este mensaje",
+  "Language.Set.Success.en": "Idioma configurado a Inglés para este servidor.",
+  "Language.Set.Success.es": "Idioma configurado a Español para este servidor.",
+  "Language.Set.Invalid": "Idioma no válido. Soportados: en, es.",
+  "Language.Set.ForGuildOnly": "Este comando solo puede usarse dentro de un servidor."
+}

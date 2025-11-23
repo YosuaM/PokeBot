@@ -3,9 +3,12 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PokeBotDiscord;
+using PokeBotDiscord.Data;
+using PokeBotDiscord.Services;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -15,6 +18,16 @@ builder.Configuration
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
+
+var dataDirectory = Path.Combine(AppContext.BaseDirectory, "data");
+Directory.CreateDirectory(dataDirectory);
+
+var connectionString = $"Data Source={Path.Combine(dataDirectory, "pokebot.db")}";
+
+builder.Services.AddDbContext<PokeBotDbContext>(options =>
+    options.UseSqlite(connectionString));
+
+builder.Services.AddScoped<ILocalizationService, LocalizationService>();
 
 builder.Services.AddSingleton(sp =>
 {
