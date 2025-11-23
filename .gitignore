@@ -1,0 +1,85 @@
+## Visual Studio / .NET
+bin/
+obj/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Bb]uild[Ll]og.*
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vsp
+*.vsps
+*.vspx
+*.vsmdi
+*.psess
+*.tmp_proj
+*.pdb
+*.cache
+*.log
+*.tdlog
+*.tlog
+*.meta
+*.ilk
+*.iobj
+*.ipdb
+*.opendb
+*.VC.db
+*.VC.VC.opendb
+*.obj
+*.idb
+*.tlog
+*.lastcodeanalysissucceeded
+*.sass-cache
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+## Visual Studio (general)
+.vs/
+*.userprefs
+
+## JetBrains IDEs (Rider, IntelliJ, etc.)
+.idea/
+*.iml
+out/
+
+## Package managers / build
+node_modules/
+packages/
+*.nupkg
+*.snupkg
+project.lock.json
+package-lock.json
+yarn.lock
+
+## Logs
+*.log
+logs/
+
+## OS-specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ ehthumbs.db
+Thumbs.db
+
+## Other
+*.swp
+*.swo
+*.orig
+*.tmp
+~$*
+*.bak
+*.old
+
+## Rider / Resharper caches
+_ReSharper.Caches/
+
