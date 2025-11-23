@@ -1,0 +1,16 @@
+services:
+  pokebot:
+    build: .
+    container_name: pokebot
+    restart: unless-stopped
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+    volumes:
+      # Persist SQLite DB
+      - ./data:/app/data
+    # logging basic rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
