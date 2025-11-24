@@ -34,6 +34,7 @@ public class ProfileModule : InteractionModuleBase<SocketInteractionContext>
 
         var player = await _dbContext.Players
             .Include(p => p.Party)
+            .Include(p => p.CurrentLocation)
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.GuildId == guildId && p.DiscordUserId == userId);
 
@@ -46,25 +47,66 @@ public class ProfileModule : InteractionModuleBase<SocketInteractionContext>
 
         var partyCount = player.Party?.Count ?? 0;
 
+        // Localized strings
         var title = _localizationService.GetString("Profile.Title", language);
         var serverLabel = _localizationService.GetString("Profile.ServerLabel", language);
         var trainerLabel = _localizationService.GetString("Profile.TrainerLabel", language);
         var locationLabel = _localizationService.GetString("Profile.LocationLabel", language);
+        var pokedexLabel = _localizationService.GetString("Profile.PokedexLabel", language);
+        var badgesLabel = _localizationService.GetString("Profile.BadgesLabel", language);
+        var badgesNone = _localizationService.GetString("Profile.BadgesNone", language);
         var moneyLabel = _localizationService.GetString("Profile.MoneyLabel", language);
-        var partySizeLabel = _localizationService.GetString("Profile.PartySizeLabel", language);
-        var lastTurnLabel = _localizationService.GetString("Profile.LastTurnLabel", language);
+        var staminaLabel = _localizationService.GetString("Profile.StaminaLabel", language);
 
-        var embed = new EmbedBuilder()
-            .WithTitle(title)
-            .WithColor(Color.Gold)
-            .AddField(serverLabel, Context.Guild.Name, inline: false)
-            .AddField(trainerLabel, Context.User.Mention, inline: false)
-            .AddField(locationLabel, player.CurrentLocationId, inline: true)
-            .AddField(moneyLabel, player.Money.ToString(), inline: true)
-            .AddField(partySizeLabel, partyCount.ToString(), inline: true)
-            .AddField(lastTurnLabel, player.LastTurnAtUtc.ToString("u"), inline: false)
-            .Build();
+        // Location name (localized by location code if available)
+        string locationName;
+        if (player.CurrentLocation is not null && !string.IsNullOrWhiteSpace(player.CurrentLocation.Code))
+        {
+            var locationKey = $"Locations.{player.CurrentLocation.Code}.Name";
+            var localized = _localizationService.GetString(locationKey, language);
+            locationName = localized == locationKey ? player.CurrentLocation.Code : localized;
+        }
+        else
+        {
+            locationName = player.CurrentLocationId.ToString();
+        }
 
-        await RespondAsync(embed: embed, ephemeral: false);
+        // Pokédex: distinct species in party / total enabled species
+        if (player.Party != null)
+        {
+            var capturedSpeciesCount = player.Party
+                .Select(pi => pi.PokemonSpeciesId)
+                .Distinct()
+                .Count();
+
+            var totalSpecies = await _dbContext.PokemonSpecies
+                .AsNoTracking()
+                .CountAsync(s => s.Enabled);
+
+            var pokedexValue = $"{capturedSpeciesCount} / {totalSpecies}";
+
+            // Badges: placeholder for now
+            var badgesValue = badgesNone;
+
+            var staminaValue = $"{player.CurrentStamina} / {player.MaxStamina}";
+
+            // User avatar thumbnail on the right
+            var avatarUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl();
+
+            var embed = new EmbedBuilder()
+                .WithTitle(title)
+                .WithColor(Color.Gold)
+                .WithThumbnailUrl(avatarUrl)
+                .AddField(serverLabel, Context.Guild.Name, inline: false)
+                .AddField(trainerLabel, Context.User.Mention, inline: false)
+                .AddField(locationLabel, locationName, inline: false)
+                .AddField(pokedexLabel, pokedexValue, inline: false)
+                .AddField(badgesLabel, badgesValue, inline: false)
+                .AddField(moneyLabel, player.Money.ToString(), inline: false)
+                .AddField(staminaLabel, staminaValue, inline: false)
+                .Build();
+
+            await RespondAsync(embed: embed, ephemeral: false);
+        }
     }
 }

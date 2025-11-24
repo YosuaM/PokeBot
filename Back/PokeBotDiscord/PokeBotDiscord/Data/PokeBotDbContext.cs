@@ -14,6 +14,8 @@ public class PokeBotDbContext : DbContext
     public DbSet<LocationType> LocationTypes { get; set; } = null!;
     public DbSet<Gym> Gyms { get; set; } = null!;
     public DbSet<ItemType> ItemTypes { get; set; } = null!;
+    public DbSet<LocationConnection> LocationConnections { get; set; } = null!;
+    public DbSet<PlayerGymBadge> PlayerGymBadges { get; set; } = null!;
 
     public PokeBotDbContext(DbContextOptions<PokeBotDbContext> options) : base(options)
     {
@@ -74,6 +76,39 @@ public class PokeBotDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(lt => lt.GymId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<LocationConnection>(entity =>
+        {
+            entity.HasOne(lc => lc.FromLocation)
+                .WithMany()
+                .HasForeignKey(lc => lc.FromLocationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(lc => lc.ToLocation)
+                .WithMany()
+                .HasForeignKey(lc => lc.ToLocationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(lc => lc.RequiredGym)
+                .WithMany()
+                .HasForeignKey(lc => lc.RequiredGymId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PlayerGymBadge>(entity =>
+        {
+            entity.HasOne(pgb => pgb.Player)
+                .WithMany(p => p.GymBadges)
+                .HasForeignKey(pgb => pgb.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(pgb => pgb.Gym)
+                .WithMany()
+                .HasForeignKey(pgb => pgb.GymId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(pgb => new { pgb.PlayerId, pgb.GymId }).IsUnique();
         });
 
         base.OnModelCreating(modelBuilder);

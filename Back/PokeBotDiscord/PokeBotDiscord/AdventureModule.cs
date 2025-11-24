@@ -256,7 +256,8 @@ public class AdventureModule : InteractionModuleBase<SocketInteractionContext>
             CurrentLocationId = initialLocation.Id,
             Money = 0,
             LastTurnAtUtc = now,
-            TurnCredits = 0.0M
+            CurrentStamina = 5,
+            MaxStamina = 5,
         };
 
         var starterInstance = new PokemonInstance

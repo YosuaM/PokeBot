@@ -16,12 +16,13 @@ public class Player
 
     public int Money { get; set; } = 0;
 
-    // Turn system
+    // Stamina system
     public DateTime LastTurnAtUtc { get; set; } = DateTime.UtcNow;
-    [Column(TypeName = "decimal(18,1)")]
-    public decimal TurnCredits { get; set; } = 0.0M;
+    public int MaxStamina { get; set; } = 5;
+    public int CurrentStamina { get; set; } = 5;
 
     // Relationships
     public List<PokemonInstance> Party { get; set; } = new();
     public List<InventoryItem> Inventory { get; set; } = new();
+    public List<PlayerGymBadge> GymBadges { get; set; } = new();
 }

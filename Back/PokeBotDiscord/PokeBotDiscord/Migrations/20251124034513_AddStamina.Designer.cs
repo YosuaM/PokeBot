@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PokeBotDiscord.Data;
 
@@ -10,9 +11,11 @@ using PokeBotDiscord.Data;
 namespace PokeBotDiscord.Migrations
 {
     [DbContext(typeof(PokeBotDbContext))]
-    partial class PokeBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251124034513_AddStamina")]
+    partial class AddStamina
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -40,10 +43,6 @@ namespace PokeBotDiscord.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("BadgeCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -122,32 +121,6 @@ namespace PokeBotDiscord.Migrations
                     b.ToTable("Locations");
                 });
 
-            modelBuilder.Entity("PokeBotDiscord.Data.Entities.LocationConnection", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("FromLocationId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("RequiredGymId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ToLocationId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FromLocationId");
-
-                    b.HasIndex("RequiredGymId");
-
-                    b.HasIndex("ToLocationId");
-
-                    b.ToTable("LocationConnections");
-                });
-
             modelBuilder.Entity("PokeBotDiscord.Data.Entities.LocationType", b =>
                 {
                     b.Property<int>("Id")
@@ -219,31 +192,6 @@ namespace PokeBotDiscord.Migrations
                         .IsUnique();
 
                     b.ToTable("Players");
-                });
-
-            modelBuilder.Entity("PokeBotDiscord.Data.Entities.PlayerGymBadge", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("GymId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("ObtainedAtUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GymId");
-
-                    b.HasIndex("PlayerId", "GymId")
-                        .IsUnique();
-
-                    b.ToTable("PlayerGymBadges");
                 });
 
             modelBuilder.Entity("PokeBotDiscord.Data.Entities.PokemonInstance", b =>
@@ -319,32 +267,6 @@ namespace PokeBotDiscord.Migrations
                     b.Navigation("LocationType");
                 });
 
-            modelBuilder.Entity("PokeBotDiscord.Data.Entities.LocationConnection", b =>
-                {
-                    b.HasOne("PokeBotDiscord.Data.Entities.Location", "FromLocation")
-                        .WithMany()
-                        .HasForeignKey("FromLocationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("PokeBotDiscord.Data.Entities.Gym", "RequiredGym")
-                        .WithMany()
-                        .HasForeignKey("RequiredGymId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("PokeBotDiscord.Data.Entities.Location", "ToLocation")
-                        .WithMany()
-                        .HasForeignKey("ToLocationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("FromLocation");
-
-                    b.Navigation("RequiredGym");
-
-                    b.Navigation("ToLocation");
-                });
-
             modelBuilder.Entity("PokeBotDiscord.Data.Entities.LocationType", b =>
                 {
                     b.HasOne("PokeBotDiscord.Data.Entities.Gym", "Gym")
@@ -364,25 +286,6 @@ namespace PokeBotDiscord.Migrations
                         .IsRequired();
 
                     b.Navigation("CurrentLocation");
-                });
-
-            modelBuilder.Entity("PokeBotDiscord.Data.Entities.PlayerGymBadge", b =>
-                {
-                    b.HasOne("PokeBotDiscord.Data.Entities.Gym", "Gym")
-                        .WithMany()
-                        .HasForeignKey("GymId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("PokeBotDiscord.Data.Entities.Player", "Player")
-                        .WithMany("GymBadges")
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Gym");
-
-                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("PokeBotDiscord.Data.Entities.PokemonInstance", b =>
@@ -411,8 +314,6 @@ namespace PokeBotDiscord.Migrations
 
             modelBuilder.Entity("PokeBotDiscord.Data.Entities.Player", b =>
                 {
-                    b.Navigation("GymBadges");
-
                     b.Navigation("Inventory");
 
                     b.Navigation("Party");
