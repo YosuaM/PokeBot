@@ -34,6 +34,7 @@ if (!Path.IsPathRooted(dbPath))
 	dbPath = Path.Combine(dataDirectory, dbPath);
 }
 
+Console.WriteLine($"[PokeBot] Using database path: {dbPath}");
 var connectionString = $"Data Source={dbPath}";
 
 builder.Services.AddDbContext<PokeBotDbContext>(options =>

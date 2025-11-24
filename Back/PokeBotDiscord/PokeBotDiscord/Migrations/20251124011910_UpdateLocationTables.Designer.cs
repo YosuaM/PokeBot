@@ -11,8 +11,8 @@ using PokeBotDiscord.Data;
 namespace PokeBotDiscord.Migrations
 {
     [DbContext(typeof(PokeBotDbContext))]
-    [Migration("20251124002329_RemovePokemonStorageCollection")]
-    partial class RemovePokemonStorageCollection
+    [Migration("20251124011910_UpdateLocationTables")]
+    partial class UpdateLocationTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -102,6 +102,12 @@ namespace PokeBotDiscord.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Hidden")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("LocationTypeId")
                         .HasColumnType("INTEGER");
 
@@ -135,16 +141,10 @@ namespace PokeBotDiscord.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int?>("GymId")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("HasWildEncounters")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("Hidden")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

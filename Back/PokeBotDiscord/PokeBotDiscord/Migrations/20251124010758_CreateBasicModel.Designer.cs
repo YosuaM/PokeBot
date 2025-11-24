@@ -11,8 +11,8 @@ using PokeBotDiscord.Data;
 namespace PokeBotDiscord.Migrations
 {
     [DbContext(typeof(PokeBotDbContext))]
-    [Migration("20251124001933_BasicDatabaseStructure")]
-    partial class BasicDatabaseStructure
+    [Migration("20251124010758_CreateBasicModel")]
+    partial class CreateBasicModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -197,17 +197,12 @@ namespace PokeBotDiscord.Migrations
                     b.Property<long>("PlayerId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("PlayerId1")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("PokemonSpeciesId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PlayerId");
-
-                    b.HasIndex("PlayerId1");
 
                     b.HasIndex("PokemonSpeciesId");
 
@@ -289,10 +284,6 @@ namespace PokeBotDiscord.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PokeBotDiscord.Data.Entities.Player", null)
-                        .WithMany("Storage")
-                        .HasForeignKey("PlayerId1");
-
                     b.HasOne("PokeBotDiscord.Data.Entities.PokemonSpecies", "Species")
                         .WithMany()
                         .HasForeignKey("PokemonSpeciesId")
@@ -314,8 +305,6 @@ namespace PokeBotDiscord.Migrations
                     b.Navigation("Inventory");
 
                     b.Navigation("Party");
-
-                    b.Navigation("Storage");
                 });
 #pragma warning restore 612, 618
         }

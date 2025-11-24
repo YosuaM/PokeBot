@@ -10,4 +10,9 @@ public class PokemonSpecies
     // Code name
     [MaxLength(50)]
     public string Code { get; set; } = string.Empty;
+
+    // Whether this species can be selected as a starter
+    public bool IsStarter { get; set; } = false;
+
+    public bool Enabled { get; set; } = true;
 }

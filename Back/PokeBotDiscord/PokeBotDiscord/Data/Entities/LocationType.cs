@@ -9,9 +9,6 @@ public class LocationType
     [MaxLength(50)]
     public string Code { get; set; } = String.Empty;
 
-    public bool Enabled { get; set; } = false;
-    public bool Hidden { get; set; } = true;
-
     public bool HasWildEncounters { get; set; } = false;
     public bool AccessToShop { get; set; } = false;
     public bool AccessToGym { get; set; } = false;

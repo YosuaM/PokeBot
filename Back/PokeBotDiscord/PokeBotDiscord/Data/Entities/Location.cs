@@ -11,4 +11,7 @@ public class Location
 
     public int LocationTypeId { get; set; }
     public LocationType LocationType { get; set; }  = null!;
+
+    public bool Enabled { get; set; } = false;
+    public bool Hidden { get; set; } = true;
 }

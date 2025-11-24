@@ -8,16 +8,16 @@ BEGIN TRANSACTION;
 --          AccessToGym, AccessToPokemonCenter, AccessToPokemonLeague, GymId
 -- Using explicit Id values ensures stable IDs across reruns.
 
-INSERT OR IGNORE INTO LocationType
-(Id, Code, Enabled, Hidden, HasWildEncounters, AccessToShop, AccessToGym, AccessToPokemonCenter, AccessToPokemonLeague, GymId)
+INSERT OR IGNORE INTO LocationTypes
+(Id, Code, HasWildEncounters, AccessToShop, AccessToGym, AccessToPokemonCenter, AccessToPokemonLeague, GymId)
 VALUES
-(1, 'City',     1, 0, 0, 1, 1, 1, 0, NULL),
-(2, 'Route',    1, 0, 1, 0, 0, 0, 0, NULL),
-(3, 'Forest',   1, 0, 1, 0, 0, 0, 0, NULL),
-(4, 'Cave',     1, 0, 1, 0, 0, 0, 0, NULL),
-(5, 'Tower',    1, 0, 1, 0, 0, 0, 0, NULL),
-(6, 'Building', 1, 0, 0, 0, 0, 0, 0, NULL),
-(7, 'League',   1, 0, 0, 0, 0, 0, 1, NULL);
+(1, 'City',     0, 1, 1, 1, 0, NULL),
+(2, 'Route',    1, 0, 0, 0, 0, NULL),
+(3, 'Forest',   1, 0, 0, 0, 0, NULL),
+(4, 'Cave',     1, 0, 0, 0, 0, NULL),
+(5, 'Tower',    1, 0, 0, 0, 0, NULL),
+(6, 'Building', 0, 0, 0, 0, 0, NULL),
+(7, 'League',   0, 0, 0, 0, 1, NULL);
 
 -- =========================================================
 -- 2) LOCATIONS (KANTO GEN 1, fixed IDs)
@@ -26,8 +26,8 @@ VALUES
 -- Columns: Id, Code, LocationTypeId, Enabled, Hidden
 -- IMPORTANT: Ids below are fixed and should never change.
 
-INSERT OR IGNORE INTO Location
-(Id, Code, LocationTypeId, Enabled, Hidden)
+INSERT OR IGNORE INTO Locations
+(Id, Code, LocationTypeId, [Enabled], [Hidden])
 VALUES
 -- --- Towns / Cities ---
 (1,  'PalletTown',     1, 1, 0),

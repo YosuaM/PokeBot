@@ -6,11 +6,23 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PokeBotDiscord.Migrations
 {
     /// <inheritdoc />
-    public partial class BasicDatabaseStructure : Migration
+    public partial class CreateBasicModel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "GuildSettings",
+                columns: table => new
+                {
+                    GuildId = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    Language = table.Column<string>(type: "TEXT", maxLength: 5, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GuildSettings", x => x.GuildId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Gyms",
                 columns: table => new
@@ -155,8 +167,7 @@ namespace PokeBotDiscord.Migrations
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     PokemonSpeciesId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
-                    PlayerId1 = table.Column<long>(type: "INTEGER", nullable: true)
+                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -167,11 +178,6 @@ namespace PokeBotDiscord.Migrations
                         principalTable: "Players",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PokemonInstances_Players_PlayerId1",
-                        column: x => x.PlayerId1,
-                        principalTable: "Players",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_PokemonInstances_PokemonSpecies_PokemonSpeciesId",
                         column: x => x.PokemonSpeciesId,
@@ -217,11 +223,6 @@ namespace PokeBotDiscord.Migrations
                 column: "PlayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PokemonInstances_PlayerId1",
-                table: "PokemonInstances",
-                column: "PlayerId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_PokemonInstances_PokemonSpeciesId",
                 table: "PokemonInstances",
                 column: "PokemonSpeciesId");
@@ -230,6 +231,9 @@ namespace PokeBotDiscord.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "GuildSettings");
+
             migrationBuilder.DropTable(
                 name: "InventoryItems");
 
