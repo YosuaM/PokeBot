@@ -1,6 +1,6 @@
 {
   "Help.Title": "PokeBot Ayuda",
-  "Help.Body": "/help — muestra este mensaje",
+  "Help.Body": "/help — muestra este mensaje de ayuda\n/language — configura el idioma del bot para este servidor\n/start — comienza tu aventura Pokémon y elige tu inicial\n/profile — muestra tu perfil de entrenador en este servidor",
   "Language.Set.Success.en": "Idioma configurado a Inglés para este servidor.",
   "Language.Set.Success.es": "Idioma configurado a Español para este servidor.",
   "Language.Set.Invalid": "Idioma no válido. Soportados: en, es.",
