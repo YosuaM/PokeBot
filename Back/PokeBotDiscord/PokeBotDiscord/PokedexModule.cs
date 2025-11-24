@@ -1,0 +1,233 @@
+using Discord;
+using Discord.Interactions;
+using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
+using PokeBotDiscord.Data;
+using PokeBotDiscord.Data.Entities;
+using PokeBotDiscord.Services;
+
+namespace PokeBotDiscord;
+
+public class PokedexModule : InteractionModuleBase<SocketInteractionContext>
+{
+    private readonly PokeBotDbContext _dbContext;
+    private readonly ILocalizationService _localizationService;
+
+    private const int PageSize = 20;
+
+    public PokedexModule(PokeBotDbContext dbContext, ILocalizationService localizationService)
+    {
+        _dbContext = dbContext;
+        _localizationService = localizationService;
+    }
+
+    [SlashCommand("pokedex", "Shows a player's Pokédex for this server")] 
+    public async Task PokedexAsync(IUser? targetUser = null)
+    {
+        if (Context.Guild is null)
+        {
+            var msg = _localizationService.GetString("Adventure.ForGuildOnly", "en");
+            await RespondAsync(msg, ephemeral: true);
+            return;
+        }
+
+        var guildId = Context.Guild.Id;
+        var language = _localizationService.GetGuildLanguage(guildId);
+
+        var target = targetUser ?? Context.User;
+
+        // Ensure the target user is a member of this guild
+        var guildUser = Context.Guild.GetUser(target.Id);
+        if (guildUser is null)
+        {
+            var notFound = _localizationService.GetString("Profile.TrainerNotFound", language);
+            await RespondAsync(notFound, ephemeral: true);
+            return;
+        }
+
+        var player = await _dbContext.Players
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.GuildId == guildId && p.DiscordUserId == target.Id);
+
+        if (player is null)
+        {
+            var notFound = _localizationService.GetString("Profile.TrainerNotFound", language);
+            await RespondAsync(notFound, ephemeral: true);
+            return;
+        }
+
+        await RespondWithPokedexPageAsync(target, player, 0, language, ownerId: Context.User.Id);
+    }
+
+    [ComponentInteraction("pokedex_page:*:*:*")]
+    public async Task HandlePokedexPageAsync(int page, ulong ownerId, ulong targetUserId)
+    {
+        if (Context.Guild is null)
+        {
+            var msg = _localizationService.GetString("Adventure.ForGuildOnly", "en");
+            await RespondAsync(msg, ephemeral: true);
+            return;
+        }
+
+        if (Context.User.Id != ownerId)
+        {
+            await RespondAsync("You cannot change the Pokédex page for another user.", ephemeral: true);
+            return;
+        }
+
+        var guildId = Context.Guild.Id;
+        var language = _localizationService.GetGuildLanguage(guildId);
+
+        var target = Context.Guild.GetUser(targetUserId) as IUser;
+        if (target is null)
+        {
+            var notFound = _localizationService.GetString("Profile.TrainerNotFound", language);
+            await RespondAsync(notFound, ephemeral: true);
+            return;
+        }
+
+        var player = await _dbContext.Players
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.GuildId == guildId && p.DiscordUserId == target.Id);
+
+        if (player is null)
+        {
+            var notFound = _localizationService.GetString("Profile.TrainerNotFound", language);
+            await RespondAsync(notFound, ephemeral: true);
+            return;
+        }
+
+        await RespondWithPokedexPageAsync(target, player, page, language, ownerId);
+    }
+
+    private async Task RespondWithPokedexPageAsync(IUser target, Player player, int page, string language, ulong ownerId)
+    {
+        // Load all enabled species and the player's instances
+        var speciesList = await _dbContext.PokemonSpecies
+            .Where(s => s.Enabled)
+            .OrderBy(s => s.Id)
+            .ToListAsync();
+
+        var instances = await _dbContext.Set<PokemonInstance>()
+            .Where(pi => pi.PlayerId == player.Id)
+            .ToListAsync();
+
+        var totalSpecies = speciesList.Count;
+        if (totalSpecies == 0)
+        {
+            var none = _localizationService.GetString("Pokedex.None", language);
+            await RespondOrUpdateAsync(new EmbedBuilder().WithTitle("Pokédex").WithDescription(none).WithColor(Color.DarkGrey).Build(), null, ownerId, page, 0, 0, language, target);
+            return;
+        }
+
+        var maxPage = (int)Math.Max(0, Math.Ceiling(totalSpecies / (double)PageSize) - 1);
+
+        // Circular pagination: wrap around when going past ends
+        if (page < 0)
+        {
+            page = maxPage;
+        }
+        else if (page > maxPage)
+        {
+            page = 0;
+        }
+
+        var startIndex = page * PageSize;
+        var pageSpecies = speciesList.Skip(startIndex).Take(PageSize).ToList();
+
+        var entries = new List<string>();
+
+        foreach (var species in pageSpecies)
+        {
+            var instance = instances.FirstOrDefault(pi => pi.PokemonSpeciesId == species.Id);
+            var number = species.Id;
+
+            string line;
+            if (instance is null)
+            {
+                // Locked: not discovered yet
+                line = $"#{number:000}  :lock: ???";
+            }
+            else
+            {
+                // Unlocked: show icon and code, and level only when >= 1
+                var icon = string.IsNullOrWhiteSpace(species.IconCode) ? string.Empty : species.IconCode + " ";
+                if (instance.Level <= 0)
+                {
+                    line = $"#{number:000}  {icon}{species.Code}";
+                }
+                else
+                {
+                    line = $"#{number:000}  {icon}{species.Code} - Lv {instance.Level}";
+                }
+            }
+
+            entries.Add(line);
+        }
+
+        var unlockedCount = instances
+            .Where(pi => pi.Level >= 0)
+            .Select(pi => pi.PokemonSpeciesId)
+            .Distinct()
+            .Count();
+
+        var ownedCount = instances
+            .Where(pi => pi.Level >= 1)
+            .Select(pi => pi.PokemonSpeciesId)
+            .Distinct()
+            .Count();
+
+        var title = _localizationService.GetString("Pokedex.Title", language);
+        var desc = string.Join("\n", entries);
+
+        var footerFmt = _localizationService.GetString("Pokedex.Footer", language);
+        var footerText = string.Format(footerFmt, page + 1, maxPage + 1, unlockedCount, totalSpecies, ownedCount);
+
+        var avatarUrl = target.GetAvatarUrl() ?? target.GetDefaultAvatarUrl();
+
+        var embed = new EmbedBuilder()
+            .WithTitle(title)
+            .WithThumbnailUrl(avatarUrl)
+            .WithColor(Color.DarkBlue)
+            .WithDescription(desc)
+            .WithFooter(footerText)
+            .Build();
+
+        var components = BuildPaginationComponents(page, maxPage, ownerId, target.Id, language);
+
+        await RespondOrUpdateAsync(embed, components, ownerId, page, maxPage, totalSpecies, language, target);
+    }
+
+    private MessageComponent BuildPaginationComponents(int page, int maxPage, ulong ownerId, ulong targetUserId, string language)
+    {
+        var previousLabel = _localizationService.GetString("Pokedex.PreviousPage", language);
+        var nextLabel = _localizationService.GetString("Pokedex.NextPage", language);
+
+        var builder = new ComponentBuilder();
+
+        // If there is only one page, both buttons are disabled
+        var singlePage = maxPage <= 0;
+
+        builder.WithButton(previousLabel, $"pokedex_page:{page - 1}:{ownerId}:{targetUserId}", ButtonStyle.Primary, disabled: singlePage);
+        builder.WithButton(nextLabel, $"pokedex_page:{page + 1}:{ownerId}:{targetUserId}", ButtonStyle.Primary, disabled: singlePage);
+
+        return builder.Build();
+    }
+
+    private async Task RespondOrUpdateAsync(Embed embed, MessageComponent? components, ulong ownerId, int page, int maxPage, int totalSpecies, string language, IUser target)
+    {
+        // For component interactions (pagination buttons), always edit the original message
+        if (Context.Interaction is SocketMessageComponent component)
+        {
+            await component.UpdateAsync(msg =>
+            {
+                msg.Embed = embed;
+                msg.Components = components ?? new ComponentBuilder().Build();
+            });
+            return;
+        }
+
+        // For the initial slash command, send a normal response
+        await RespondAsync(embed: embed, components: components, ephemeral: false);
+    }
+}

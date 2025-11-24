@@ -252,6 +252,9 @@ namespace PokeBotDiscord.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Level")
+                        .HasColumnType("INTEGER");
+
                     b.Property<long>("PlayerId")
                         .HasColumnType("INTEGER");
 
@@ -280,6 +283,11 @@ namespace PokeBotDiscord.Migrations
 
                     b.Property<bool>("Enabled")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("IconCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("IsStarter")
                         .HasColumnType("INTEGER");

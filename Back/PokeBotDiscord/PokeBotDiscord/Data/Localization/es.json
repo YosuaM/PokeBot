@@ -1,6 +1,6 @@
 {
   "Help.Title": "PokeBot Ayuda",
-  "Help.Body": "/help — muestra este mensaje de ayuda\n/settings language <en|es> — configura el idioma del bot para este servidor\n/settings stamina <1-5> — configura cuánta estamina se recupera por hora\n/start — comienza tu aventura Pokémon y elige tu inicial\n/profile [usuario] — muestra tu perfil de entrenador en este servidor, o el de otro entrenador si se especifica\n/move — muévete a una localización conectada, consumiendo estamina",
+  "Help.Body": "/help — muestra este mensaje de ayuda\n/settings language <en|es> — configura el idioma del bot para este servidor\n/settings stamina <1-5> — configura cuánta estamina se recupera por hora\n/start — comienza tu aventura Pokémon y elige tu inicial\n/profile [usuario] — muestra tu perfil de entrenador en este servidor, o el de otro entrenador si se especifica\n/pokedex [usuario] — muestra tu Pokédex en este servidor, o la de otro entrenador si se especifica\n/move — muévete a una localización conectada, consumiendo estamina",
   "Language.Set.Success.en": "Idioma configurado a Inglés para este servidor.",
   "Language.Set.Success.es": "Idioma configurado a Español para este servidor.",
   "Language.Set.Invalid": "Idioma no válido. Soportados: en, es.",
@@ -49,5 +49,13 @@
   "Profile.PartySizeLabel": "Tamaño del equipo",
   "Profile.LastTurnLabel": "Último turno",
   "Profile.StaminaLabel": "Estamina",
-  "Locations.PalletTown.Name": "Pueblo Paleta"
+  "Locations.PalletTown.Name": "Pueblo Paleta",
+  "Pokedex.Title": "Pokédex",
+  "Pokedex.None": "Todavía no has descubierto ningún Pokémon.",
+  "Pokedex.EntryLocked": "#{0:000} ???",
+  "Pokedex.EntrySeen": "#{0:000} {1} — Visto",
+  "Pokedex.EntryOwned": "#{0:000} {1} — Nv {2}",
+  "Pokedex.Footer": "Página {0}/{1} • Vistos {2}/{3} • En propiedad {4}",
+  "Pokedex.PreviousPage": "Anterior",
+  "Pokedex.NextPage": "Siguiente"
 }

@@ -15,4 +15,8 @@ public class PokemonSpecies
     public bool IsStarter { get; set; } = false;
 
     public bool Enabled { get; set; } = true;
+
+    // Icon code
+    [MaxLength(50)]
+    public string IconCode { get; set; } = string.Empty;
 }

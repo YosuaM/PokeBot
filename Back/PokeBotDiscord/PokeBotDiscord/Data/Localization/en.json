@@ -1,6 +1,6 @@
 {
   "Help.Title": "PokeBot Help",
-  "Help.Body": "/help — show this help message\n/settings language <en|es> — set the bot language for this server\n/settings stamina <1-5> — set how many stamina points are recovered per hour\n/start — start your Pokémon adventure and choose a starter\n/profile [user] — show your trainer profile for this server, or another trainer's if specified\n/move — move to a connected location, consuming stamina",
+  "Help.Body": "/help — show this help message\n/settings language <en|es> — set the bot language for this server\n/settings stamina <1-5> — set how many stamina points are recovered per hour\n/start — start your Pokémon adventure and choose a starter\n/profile [user] — show your trainer profile for this server, or another trainer's if specified\n/pokedex [user] — show your Pokédex for this server, or another trainer's if specified\n/move — move to a connected location, consuming stamina",
   "Language.Set.Success.en": "Language set to English for this server.",
   "Language.Set.Success.es": "Language set to Spanish for this server.",
   "Language.Set.Invalid": "Invalid language. Supported: en, es.",
@@ -49,5 +49,13 @@
   "Profile.PartySizeLabel": "Party size",
   "Profile.LastTurnLabel": "Last turn",
   "Profile.StaminaLabel": "Stamina",
-  "Locations.PalletTown.Name": "Pallet Town"
+  "Locations.PalletTown.Name": "Pallet Town",
+  "Pokedex.Title": "Pokédex",
+  "Pokedex.None": "No Pokémon have been discovered yet.",
+  "Pokedex.EntryLocked": "#{0:000} ???",
+  "Pokedex.EntrySeen": "#{0:000} {1} — Seen",
+  "Pokedex.EntryOwned": "#{0:000} {1} — Lv {2}",
+  "Pokedex.Footer": "Page {0}/{1} • Seen {2}/{3} species • Owned {4}",
+  "Pokedex.PreviousPage": "Previous",
+  "Pokedex.NextPage": "Next"
 }

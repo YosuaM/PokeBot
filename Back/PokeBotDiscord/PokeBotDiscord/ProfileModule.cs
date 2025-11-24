@@ -183,7 +183,7 @@ public class ProfileModule : InteractionModuleBase<SocketInteractionContext>
                 .AddField(locationLabel, locationName, inline: false)
                 .AddField(pokedexLabel, pokedexValue, inline: false)
                 .AddField(badgesLabel, badgesValue, inline: false)
-                .AddField(moneyLabel, player.Money.ToString(), inline: false)
+                .AddField(moneyLabel, $"${player.Money}", inline: false)
                 .AddField(staminaLabel, staminaValue, inline: false)
                 .Build();
 
