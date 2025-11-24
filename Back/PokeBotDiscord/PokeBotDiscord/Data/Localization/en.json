@@ -1,6 +1,6 @@
 {
   "Help.Title": "PokeBot Help",
-  "Help.Body": "/help — show this help message\n/settings language <en|es> — set the bot language for this server\n/settings stamina <1-5> — set how many stamina points are recovered per hour\n/start — start your Pokémon adventure and choose a starter\n/profile — show your trainer profile for this server\n/move — move to a connected location, consuming stamina",
+  "Help.Body": "/help — show this help message\n/settings language <en|es> — set the bot language for this server\n/settings stamina <1-5> — set how many stamina points are recovered per hour\n/start — start your Pokémon adventure and choose a starter\n/profile [user] — show your trainer profile for this server, or another trainer's if specified\n/move — move to a connected location, consuming stamina",
   "Language.Set.Success.en": "Language set to English for this server.",
   "Language.Set.Success.es": "Language set to Spanish for this server.",
   "Language.Set.Invalid": "Invalid language. Supported: en, es.",
@@ -45,6 +45,7 @@
   "Profile.BadgesLabel": "Badges",
   "Profile.BadgesNone": "None",
   "Profile.MoneyLabel": "Money",
+  "Profile.TrainerNotFound": "Trainer not found on this server.",
   "Profile.PartySizeLabel": "Party size",
   "Profile.LastTurnLabel": "Last turn",
   "Profile.StaminaLabel": "Stamina",

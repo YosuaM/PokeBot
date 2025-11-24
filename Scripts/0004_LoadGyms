@@ -1,0 +1,48 @@
+BEGIN TRANSACTION;
+
+-- =========================================================
+-- KANTO GEN 1 GYMS
+-- Table: Gyms
+-- Columns: Id, Code, BadgeCode
+--
+-- BadgeCode must match the emoji filename (without extension) in your
+-- resources/emojis/badges (or equivalent) folder.
+--
+-- Gym order follows the classic Kanto progression:
+--  1) Pewter   - Boulder Badge
+--  2) Cerulean - Cascade Badge
+--  3) Vermilion- Thunder Badge
+--  4) Celadon  - Rainbow Badge
+--  5) Fuchsia  - Soul Badge
+--  6) Saffron  - Marsh Badge
+--  7) Cinnabar - Volcano Badge
+--  8) Viridian - Earth Badge
+-- =========================================================
+
+INSERT OR IGNORE INTO Gyms (Id, Code, BadgeCode) VALUES
+
+-- Pewter City Gym (Rock, Brock)
+(1, 'PewterGym',   '<:boulder_badge:1442401602001571870>'),
+
+-- Cerulean City Gym (Water, Misty)
+(2, 'CeruleanGym', '<:cascade_badge:1442401610461614122>'),
+
+-- Vermilion City Gym (Electric, Lt. Surge)
+(3, 'VermilionGym','<:thunder_badge:1442401609026900098>'),
+
+-- Celadon City Gym (Grass, Erika)
+(4, 'CeladonGym',  '<:rainbow_badge:1442401607882117180>'),
+
+-- Fuchsia City Gym (Poison, Koga)
+(5, 'FuchsiaGym',  '<:soul_badge:1442401606984536064>'),
+
+-- Saffron City Gym (Psychic, Sabrina)
+(6, 'SaffronGym',  '<:marsh_badge:1442401606011322380>'),
+
+-- Cinnabar Island Gym (Fire, Blaine)
+(7, 'CinnabarGym', '<:volcano_badge:1442401604790648854>'),
+
+-- Viridian City Gym (Ground, Giovanni)
+(8, 'ViridianGym', '<:earth_badge:1442401603163521116>');
+
+ROLLBACK;
