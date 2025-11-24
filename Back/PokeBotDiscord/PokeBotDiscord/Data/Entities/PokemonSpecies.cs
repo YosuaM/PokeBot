@@ -19,4 +19,7 @@ public class PokemonSpecies
     // Icon code
     [MaxLength(50)]
     public string IconCode { get; set; } = string.Empty;
+
+    // Base capture chance in percent (0-100)
+    public int CaptureRate { get; set; } = 50;
 }

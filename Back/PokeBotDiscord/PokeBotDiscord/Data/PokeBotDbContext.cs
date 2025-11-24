@@ -16,6 +16,7 @@ public class PokeBotDbContext : DbContext
     public DbSet<ItemType> ItemTypes { get; set; } = null!;
     public DbSet<LocationConnection> LocationConnections { get; set; } = null!;
     public DbSet<PlayerGymBadge> PlayerGymBadges { get; set; } = null!;
+    public DbSet<PokemonEncounter> PokemonEncounters { get; set; } = null!;
 
     public PokeBotDbContext(DbContextOptions<PokeBotDbContext> options) : base(options)
     {
@@ -94,6 +95,19 @@ public class PokeBotDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(lc => lc.RequiredGymId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PokemonEncounter>(entity =>
+        {
+            entity.HasOne(e => e.Species)
+                .WithMany()
+                .HasForeignKey(e => e.PokemonSpeciesId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Location)
+                .WithMany()
+                .HasForeignKey(e => e.LocationId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<PlayerGymBadge>(entity =>

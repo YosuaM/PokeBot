@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PokeBotDiscord.Data;
 
@@ -10,9 +11,11 @@ using PokeBotDiscord.Data;
 namespace PokeBotDiscord.Migrations
 {
     [DbContext(typeof(PokeBotDbContext))]
-    partial class PokeBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251124204654_AddPokemonEncounters")]
+    partial class AddPokemonEncounters
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -246,36 +249,6 @@ namespace PokeBotDiscord.Migrations
                     b.ToTable("PlayerGymBadges");
                 });
 
-            modelBuilder.Entity("PokeBotDiscord.Data.Entities.PokemonEncounter", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("LocationId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MaxLevel")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MinLevel")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PokemonSpeciesId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Weight")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LocationId");
-
-                    b.HasIndex("PokemonSpeciesId");
-
-                    b.ToTable("PokemonEncounters");
-                });
-
             modelBuilder.Entity("PokeBotDiscord.Data.Entities.PokemonInstance", b =>
                 {
                     b.Property<long>("Id")
@@ -427,25 +400,6 @@ namespace PokeBotDiscord.Migrations
                     b.Navigation("Gym");
 
                     b.Navigation("Player");
-                });
-
-            modelBuilder.Entity("PokeBotDiscord.Data.Entities.PokemonEncounter", b =>
-                {
-                    b.HasOne("PokeBotDiscord.Data.Entities.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PokeBotDiscord.Data.Entities.PokemonSpecies", "Species")
-                        .WithMany()
-                        .HasForeignKey("PokemonSpeciesId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Location");
-
-                    b.Navigation("Species");
                 });
 
             modelBuilder.Entity("PokeBotDiscord.Data.Entities.PokemonInstance", b =>
