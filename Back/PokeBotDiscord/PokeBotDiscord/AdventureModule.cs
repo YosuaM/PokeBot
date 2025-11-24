@@ -263,7 +263,9 @@ public class AdventureModule : InteractionModuleBase<SocketInteractionContext>
         var starterInstance = new PokemonInstance
         {
             Owner = player,
-            PokemonSpeciesId = species.Id
+            PokemonSpeciesId = species.Id,
+            Level = 1,
+            InParty = true
         };
 
         player.Party.Add(starterInstance);
