@@ -22,7 +22,19 @@ builder.Logging.AddConsole();
 var dataDirectory = Path.Combine(AppContext.BaseDirectory, "data");
 Directory.CreateDirectory(dataDirectory);
 
-var connectionString = $"Data Source={Path.Combine(dataDirectory, "pokebot.db")}";
+var dbPath = builder.Configuration["Database:Path"];
+if (string.IsNullOrWhiteSpace(dbPath))
+{
+	throw new InvalidOperationException("Database:Path must be configured in appsettings.json.");
+}
+
+// If Database:Path is relative, combine with data directory
+if (!Path.IsPathRooted(dbPath))
+{
+	dbPath = Path.Combine(dataDirectory, dbPath);
+}
+
+var connectionString = $"Data Source={dbPath}";
 
 builder.Services.AddDbContext<PokeBotDbContext>(options =>
     options.UseSqlite(connectionString));

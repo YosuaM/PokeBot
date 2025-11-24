@@ -1,0 +1,88 @@
+BEGIN TRANSACTION;
+
+-- =========================================================
+-- 1) LOCATION TYPES (fixed IDs)
+-- =========================================================
+-- Table: LocationType
+-- Columns: Id, Code, Enabled, Hidden, HasWildEncounters, AccessToShop,
+--          AccessToGym, AccessToPokemonCenter, AccessToPokemonLeague, GymId
+-- Using explicit Id values ensures stable IDs across reruns.
+
+INSERT OR IGNORE INTO LocationType
+(Id, Code, Enabled, Hidden, HasWildEncounters, AccessToShop, AccessToGym, AccessToPokemonCenter, AccessToPokemonLeague, GymId)
+VALUES
+(1, 'City',     1, 0, 0, 1, 1, 1, 0, NULL),
+(2, 'Route',    1, 0, 1, 0, 0, 0, 0, NULL),
+(3, 'Forest',   1, 0, 1, 0, 0, 0, 0, NULL),
+(4, 'Cave',     1, 0, 1, 0, 0, 0, 0, NULL),
+(5, 'Tower',    1, 0, 1, 0, 0, 0, 0, NULL),
+(6, 'Building', 1, 0, 0, 0, 0, 0, 0, NULL),
+(7, 'League',   1, 0, 0, 0, 0, 0, 1, NULL);
+
+-- =========================================================
+-- 2) LOCATIONS (KANTO GEN 1, fixed IDs)
+-- =========================================================
+-- Table: Location
+-- Columns: Id, Code, LocationTypeId, Enabled, Hidden
+-- IMPORTANT: Ids below are fixed and should never change.
+
+INSERT OR IGNORE INTO Location
+(Id, Code, LocationTypeId, Enabled, Hidden)
+VALUES
+-- --- Towns / Cities ---
+(1,  'PalletTown',     1, 1, 0),
+(2,  'ViridianCity',   1, 1, 0),
+(3,  'PewterCity',     1, 1, 0),
+(4,  'CeruleanCity',   1, 1, 0),
+(5,  'VermilionCity',  1, 1, 0),
+(6,  'LavenderTown',   1, 1, 0),
+(7,  'CeladonCity',    1, 1, 0),
+(8,  'FuchsiaCity',    1, 1, 0),
+(9,  'SaffronCity',    1, 1, 0),
+(10, 'CinnabarIsland', 1, 1, 0),
+
+-- --- League ---
+(11, 'IndigoPlateau',  7, 1, 1), -- postgame hidden
+
+-- --- Routes ---
+(101, 'Route1',   2, 1, 0),
+(102, 'Route2',   2, 1, 0),
+(103, 'Route3',   2, 1, 0),
+(104, 'Route4',   2, 1, 0),
+(105, 'Route5',   2, 1, 0),
+(106, 'Route6',   2, 1, 0),
+(107, 'Route7',   2, 1, 0),
+(108, 'Route8',   2, 1, 0),
+(109, 'Route9',   2, 1, 0),
+(110, 'Route10',  2, 1, 0),
+(111, 'Route11',  2, 1, 0),
+(112, 'Route12',  2, 1, 0),
+(113, 'Route13',  2, 1, 0),
+(114, 'Route14',  2, 1, 0),
+(115, 'Route15',  2, 1, 0),
+(116, 'Route16',  2, 1, 0),
+(117, 'Route17',  2, 1, 0),
+(118, 'Route18',  2, 1, 0),
+(119, 'Route19',  2, 1, 0),
+(120, 'Route20',  2, 1, 0),
+(121, 'Route21',  2, 1, 0),
+(122, 'Route22',  2, 1, 0),
+(123, 'Route23',  2, 1, 0),
+(124, 'Route24',  2, 1, 0),
+(125, 'Route25',  2, 1, 0),
+
+-- --- Forest / Caves / Special Areas ---
+(201, 'ViridianForest', 3, 1, 0),
+(202, 'MtMoon',         4, 1, 0),
+(203, 'DiglettCave',    4, 1, 0),
+(204, 'RockTunnel',     4, 1, 0),
+(205, 'PokemonTower',   5, 1, 0),
+(206, 'SafariZone',     3, 1, 0),
+(207, 'SeafoamIslands', 4, 1, 0),
+(208, 'PowerPlant',     6, 1, 0),
+(209, 'SilphCo',        6, 1, 0),
+(210, 'PokemonMansion', 6, 1, 0),
+(211, 'VictoryRoad',    4, 1, 0),
+(212, 'CeruleanCave',   4, 1, 1); -- postgame hidden
+
+ROLLBACK;

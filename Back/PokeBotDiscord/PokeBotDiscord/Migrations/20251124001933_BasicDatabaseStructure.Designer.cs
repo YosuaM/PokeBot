@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PokeBotDiscord.Data;
 
@@ -10,9 +11,11 @@ using PokeBotDiscord.Data;
 namespace PokeBotDiscord.Migrations
 {
     [DbContext(typeof(PokeBotDbContext))]
-    partial class PokeBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251124001933_BasicDatabaseStructure")]
+    partial class BasicDatabaseStructure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -194,12 +197,17 @@ namespace PokeBotDiscord.Migrations
                     b.Property<long>("PlayerId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long?>("PlayerId1")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("PokemonSpeciesId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PlayerId");
+
+                    b.HasIndex("PlayerId1");
 
                     b.HasIndex("PokemonSpeciesId");
 
@@ -281,6 +289,10 @@ namespace PokeBotDiscord.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PokeBotDiscord.Data.Entities.Player", null)
+                        .WithMany("Storage")
+                        .HasForeignKey("PlayerId1");
+
                     b.HasOne("PokeBotDiscord.Data.Entities.PokemonSpecies", "Species")
                         .WithMany()
                         .HasForeignKey("PokemonSpeciesId")
@@ -302,6 +314,8 @@ namespace PokeBotDiscord.Migrations
                     b.Navigation("Inventory");
 
                     b.Navigation("Party");
+
+                    b.Navigation("Storage");
                 });
 #pragma warning restore 612, 618
         }

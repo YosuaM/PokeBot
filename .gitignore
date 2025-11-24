@@ -87,3 +87,8 @@ appsettings.json
 ## Rider / Resharper caches
 _ReSharper.Caches/
 
+# Local sqlite database
+pokebot.db
+pokebot.db-shm
+pokebot.db-wal
+identifier.sqlite

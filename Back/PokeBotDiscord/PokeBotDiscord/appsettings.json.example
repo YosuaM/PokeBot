@@ -1,5 +1,8 @@
 {
   "Discord": {
     "Token": "DISCORD_TOKEN_HERE"
+  },
+  "Database": {
+    "Path": "pokebot.db"
   }
 }
