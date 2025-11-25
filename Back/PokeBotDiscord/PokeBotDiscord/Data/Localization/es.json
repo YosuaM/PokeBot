@@ -1,6 +1,6 @@
 {
   "Help.Title": "PokeBot Ayuda",
-  "Help.Body": "/help — muestra este mensaje de ayuda\n/settings language <en|es> — configura el idioma del bot para este servidor\n/settings stamina <1-5> — configura cuánta estamina se recupera por hora\n/start — comienza tu aventura Pokémon y elige tu inicial\n/profile [usuario] — muestra tu perfil de entrenador en este servidor, o el de otro entrenador si se especifica\n/party [usuario] — muestra el equipo activo de este entrenador en este servidor, o el de otro entrenador si se especifica\n/pokedex [usuario] — muestra tu Pokédex en este servidor, o la de otro entrenador si se especifica\n/move — muévete a una localización conectada, consumiendo estamina",
+  "Help.Body": "/help — muestra este mensaje de ayuda\n/settings language <en|es> — configura el idioma del bot para este servidor\n/settings stamina <1-5> — configura cuánta estamina se recupera por hora\n/start — comienza tu aventura Pokémon y elige tu inicial\n/profile [usuario] — muestra tu perfil de entrenador en este servidor, o el de otro entrenador si se especifica\n/party [usuario] — muestra el equipo activo de este entrenador en este servidor, o el de otro entrenador si se especifica\n/pokedex [usuario] — muestra tu Pokédex en este servidor, o la de otro entrenador si se especifica\n/move — muévete a una localización conectada, consumiendo estamina\n/catch — intenta encontrar y capturar un Pokémon salvaje en tu localización actual, consumiendo estamina\n/ranking badges — muestra el top de entrenadores de este servidor por número de medallas de gimnasio\n/ranking pokedex — muestra el top de entrenadores de este servidor por entradas descubiertas en la Pokédex",
   "Language.Set.Success.en": "Idioma configurado a Inglés para este servidor.",
   "Language.Set.Success.es": "Idioma configurado a Español para este servidor.",
   "Language.Set.Invalid": "Idioma no válido. Soportados: en, es.",
@@ -70,5 +70,11 @@
   "Pokedex.EntryOwned": "#{0:000} {1} — Nv {2}",
   "Pokedex.Footer": "Página {0}/{1} • Vistos {2}/{3} • En propiedad {4}",
   "Pokedex.PreviousPage": "Anterior",
-  "Pokedex.NextPage": "Siguiente"
+  "Pokedex.NextPage": "Siguiente",
+  "Ranking.Badges.Title": ":trophy: Top de entrenadores por Medallas de Gimnasio :trophy:",
+  "Ranking.Badges.Empty": "Todavía ningún entrenador tiene medallas de gimnasio en este servidor.",
+  "Ranking.Badges.Row": "#{0} - {1} - {2} medallas",
+  "Ranking.Pokedex.Title": ":trophy: Top de entrenadores por Pokédex :trophy:",
+  "Ranking.Pokedex.Empty": "Todavía ningún entrenador tiene entradas en la Pokédex en este servidor.",
+  "Ranking.Pokedex.Row": "#{0} - {1} - {2}/{3}"
 }
