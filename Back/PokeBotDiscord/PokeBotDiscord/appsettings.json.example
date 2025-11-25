@@ -4,5 +4,8 @@
   },
   "Database": {
     "Path": "pokebot.db"
+  },
+  "Map": {
+    "KantoImagePath": "resources/maps/kanto.png"
   }
 }
