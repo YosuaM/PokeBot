@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PokeBotDiscord.Data;
 
@@ -10,9 +11,11 @@ using PokeBotDiscord.Data;
 namespace PokeBotDiscord.Migrations
 {
     [DbContext(typeof(PokeBotDbContext))]
-    partial class PokeBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251125223621_AddStoreTables")]
+    partial class AddStoreTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -86,11 +89,6 @@ namespace PokeBotDiscord.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("IconCode")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");

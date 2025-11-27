@@ -17,6 +17,9 @@ public class PokeBotDbContext : DbContext
     public DbSet<LocationConnection> LocationConnections { get; set; } = null!;
     public DbSet<PlayerGymBadge> PlayerGymBadges { get; set; } = null!;
     public DbSet<PokemonEncounter> PokemonEncounters { get; set; } = null!;
+    public DbSet<StoreType> StoreTypes { get; set; } = null!;
+    public DbSet<StoreTypeItem> StoreTypeItems { get; set; } = null!;
+    public DbSet<LocationStore> LocationStores { get; set; } = null!;
 
     public PokeBotDbContext(DbContextOptions<PokeBotDbContext> options) : base(options)
     {
@@ -95,6 +98,42 @@ public class PokeBotDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(lc => lc.RequiredGymId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<StoreType>(entity =>
+        {
+            entity.Property(st => st.Code).HasMaxLength(50);
+            entity.Property(st => st.Name).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<StoreTypeItem>(entity =>
+        {
+            entity.HasOne(sti => sti.StoreType)
+                .WithMany(st => st.Items)
+                .HasForeignKey(sti => sti.StoreTypeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(sti => sti.ItemType)
+                .WithMany()
+                .HasForeignKey(sti => sti.ItemTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(sti => new { sti.StoreTypeId, sti.ItemTypeId }).IsUnique();
+        });
+
+        modelBuilder.Entity<LocationStore>(entity =>
+        {
+            entity.HasOne(ls => ls.Location)
+                .WithMany()
+                .HasForeignKey(ls => ls.LocationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(ls => ls.StoreType)
+                .WithMany(st => st.LocationStores)
+                .HasForeignKey(ls => ls.StoreTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(ls => new { ls.LocationId, ls.StoreTypeId }).IsUnique();
         });
 
         modelBuilder.Entity<PokemonEncounter>(entity =>

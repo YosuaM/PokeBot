@@ -1,0 +1,57 @@
+BEGIN TRANSACTION;
+
+-- =========================================================
+-- BASIC STORE TYPES AND ITEMS
+-- Tables:
+--   StoreTypes(Id, Code, Name, Enabled)
+--   StoreTypeItems(Id, StoreTypeId, ItemTypeId, Price, Enabled, SortOrder)
+--   LocationStores(Id, LocationId, StoreTypeId, SortOrder)
+--
+-- This script defines a basic city shop that sells Poké Ball, Great Ball
+-- and Ultra Ball, and assigns it to some early Kanto cities.
+-- You can safely rerun it thanks to INSERT OR IGNORE.
+-- =========================================================
+
+-- 1) StoreTypes
+INSERT OR IGNORE INTO StoreTypes (Id, Code, Name, Enabled) VALUES
+    (1, 'CITY_SHOP', 'City Pok9 Mart', 1);
+
+-- 2) StoreTypeItems for CITY_SHOP
+-- We assume ItemTypes with codes POKE_BALL, GREAT_BALL, ULTRA_BALL
+-- already exist (see 0006_LoadItemTypes).
+INSERT OR IGNORE INTO StoreTypeItems (StoreTypeId, ItemTypeId, Price, Enabled, SortOrder)
+SELECT 1 AS StoreTypeId, it.Id AS ItemTypeId,
+       CASE it.Code
+            WHEN 'POKE_BALL'  THEN 200
+            WHEN 'GREAT_BALL' THEN 600
+            WHEN 'ULTRA_BALL' THEN 1200
+       END AS Price,
+       1 AS Enabled,
+       CASE it.Code
+            WHEN 'POKE_BALL'  THEN 1
+            WHEN 'GREAT_BALL' THEN 2
+            WHEN 'ULTRA_BALL' THEN 3
+       END AS SortOrder
+FROM ItemTypes it
+WHERE it.Code IN ('POKE_BALL','GREAT_BALL','ULTRA_BALL');
+
+-- 3) Ensure city LocationType has access to shops
+UPDATE LocationTypes
+SET AccessToShop = 1
+WHERE Code = 'City';
+
+-- 4) LocationStores: assign CITY_SHOP to all cities
+-- We use fixed Location Ids from 0001_LoadLocations.
+INSERT OR IGNORE INTO LocationStores (LocationId, StoreTypeId, SortOrder) VALUES
+    (1,  1, 1), -- PalletTown
+    (2,  1, 1), -- ViridianCity
+    (3,  1, 1), -- PewterCity
+    (4,  1, 1), -- CeruleanCity
+    (5,  1, 1), -- VermilionCity
+    (6,  1, 1), -- LavenderTown
+    (7,  1, 1), -- CeladonCity
+    (8,  1, 1), -- FuchsiaCity
+    (9,  1, 1), -- SaffronCity
+    (10, 1, 1); -- CinnabarIsland
+
+ROLLBACK;
