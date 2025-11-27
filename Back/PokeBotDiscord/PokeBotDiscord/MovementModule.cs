@@ -328,6 +328,161 @@ public class MovementModule : InteractionModuleBase<SocketInteractionContext>
         var announceTemplate = _localizationService.GetString("Move.Announcement", language);
         var announce = string.Format(announceTemplate, Context.User.Mention, toName);
 
+        // After moving, roll for random events (item / surprise battle) and append the result
+        var eventText = await TryTriggerMoveEventAsync(player, language);
+        if (!string.IsNullOrWhiteSpace(eventText))
+        {
+            const string eventEmoji = ":bangbang:";
+
+            // Prefix each event line with the emoji
+            var lines = eventText.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            for (var i = 0; i < lines.Length; i++)
+            {
+                lines[i] = $"\n{eventEmoji} {lines[i]}";
+            }
+
+            announce += "\n" + string.Join("\n", lines);
+        }
+
         await FollowupAsync(announce, ephemeral: false);
+    }
+
+    private async Task<string?> TryTriggerMoveEventAsync(Player player, string language)
+    {
+        var settings = await _dbContext.GuildSettings
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.GuildId == player.GuildId);
+
+        var itemChance = settings?.MoveItemEventChancePercent ?? 0;
+        var battleChance = settings?.MoveBattleEventChancePercent ?? 0;
+
+        if (itemChance <= 0 && battleChance <= 0)
+        {
+            return null;
+        }
+
+        var parts = new List<string>();
+
+        // Roll independently for item and battle so both can trigger in the same move
+        if (itemChance > 0)
+        {
+            var rollItem = Random.Shared.Next(0, 100);
+            if (rollItem < itemChance)
+            {
+                var itemText = await HandleMoveItemEventAsync(player, language);
+                if (!string.IsNullOrWhiteSpace(itemText))
+                {
+                    parts.Add(itemText);
+                }
+            }
+        }
+
+        if (battleChance > 0)
+        {
+            var rollBattle = Random.Shared.Next(0, 100);
+            if (rollBattle < battleChance)
+            {
+                var battleText = await HandleMoveBattleEventAsync(player, language, settings);
+                if (!string.IsNullOrWhiteSpace(battleText))
+                {
+                    parts.Add(battleText);
+                }
+            }
+        }
+
+        if (parts.Count == 0)
+        {
+            return null;
+        }
+
+        return string.Join("\n", parts);
+    }
+
+    private async Task<string?> HandleMoveItemEventAsync(Player player, string language)
+    {
+        var rewards = await _dbContext.MoveRandomItemRewards
+            .Include(r => r.ItemType)
+            .ToListAsync();
+
+        if (rewards.Count == 0)
+        {
+            return null;
+        }
+
+        // Weighted random selection
+        var totalWeight = rewards.Sum(r => Math.Max(1, r.Weight));
+        var roll = Random.Shared.Next(1, totalWeight + 1);
+        MoveRandomItemReward picked = rewards[^1];
+        var cumulative = 0;
+        foreach (var r in rewards)
+        {
+            cumulative += Math.Max(1, r.Weight);
+            if (roll <= cumulative)
+            {
+                picked = r;
+                break;
+            }
+        }
+
+        var qty = Random.Shared.Next(Math.Max(1, picked.MinQuantity), Math.Max(picked.MinQuantity, picked.MaxQuantity) + 1);
+
+        var invItem = await _dbContext.InventoryItems
+            .FirstOrDefaultAsync(ii => ii.PlayerId == player.Id && ii.ItemTypeId == picked.ItemTypeId);
+
+        if (invItem is null)
+        {
+            invItem = new InventoryItem
+            {
+                PlayerId = player.Id,
+                ItemTypeId = picked.ItemTypeId,
+                Quantity = qty
+            };
+            _dbContext.Add(invItem);
+        }
+        else
+        {
+            invItem.Quantity += qty;
+        }
+
+        await _dbContext.SaveChangesAsync();
+
+        var icon = picked.ItemType.IconCode ?? string.Empty;
+        var nameKey = $"Item.{picked.ItemType.Code}.Name";
+        var localizedName = _localizationService.GetString(nameKey, language);
+        var name = string.IsNullOrEmpty(localizedName) || localizedName == nameKey ? picked.ItemType.Code : localizedName;
+
+        var bodyTemplate = _localizationService.GetString("Move.Event.ItemFound.Body", language);
+        var body = string.Format(bodyTemplate, qty, icon, name);
+
+        return body;
+    }
+
+    private async Task<string?> HandleMoveBattleEventAsync(Player player, string language, GuildSettings? settings)
+    {
+        // Placeholder battle: 50% chance to win
+        var winRoll = Random.Shared.Next(0, 100);
+        var win = winRoll < 50;
+
+        if (!win)
+        {
+            var bodyLose = _localizationService.GetString("Move.Event.BattleLose.Body", language);
+            return bodyLose;
+        }
+
+        var min = Math.Max(0, settings?.MoveBattleWinMinMoneyReward ?? 0);
+        var max = Math.Max(min, settings?.MoveBattleWinMaxMoneyReward ?? min);
+
+        var reward = Random.Shared.Next(min, max + 1);
+
+        if (reward > 0)
+        {
+            player.Money += reward;
+            await _dbContext.SaveChangesAsync();
+        }
+
+        var bodyTemplateWin = _localizationService.GetString("Move.Event.BattleWin.Body", language);
+        var bodyWin = string.Format(bodyTemplateWin, reward);
+
+        return bodyWin;
     }
 }

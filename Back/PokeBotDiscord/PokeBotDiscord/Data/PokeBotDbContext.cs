@@ -22,6 +22,7 @@ public class PokeBotDbContext : DbContext
     public DbSet<LocationStore> LocationStores { get; set; } = null!;
     public DbSet<PokemonRarity> PokemonRarities { get; set; } = null!;
     public DbSet<PokemonRarityCatchRate> PokemonRarityCatchRates { get; set; } = null!;
+    public DbSet<MoveRandomItemReward> MoveRandomItemRewards { get; set; } = null!;
 
     public PokeBotDbContext(DbContextOptions<PokeBotDbContext> options) : base(options)
     {

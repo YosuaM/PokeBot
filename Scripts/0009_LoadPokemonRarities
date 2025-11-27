@@ -1,7 +1,7 @@
 BEGIN TRANSACTION;
 
--- 1) Rarezas base
--- Usamos Id fijos 1..6 para que luego sea fácil referenciarlos
+-- 1) Base rarities
+-- We use fixed Ids 1..6 so they are easy to reference later
 
 INSERT INTO PokemonRarities (Id, Code, MinMoneyReward, MaxMoneyReward) VALUES
 (1, 'N',   200,  300),
@@ -11,8 +11,8 @@ INSERT INTO PokemonRarities (Id, Code, MinMoneyReward, MaxMoneyReward) VALUES
 (5, 'L',   1500, 1700),
 (6, 'RL',  2000, 2500);
 
--- 2) Probabilidades de captura por rareza y tipo de Poké Ball
--- BallCode debe coincidir con ItemType.Code: POKE_BALL, GREAT_BALL, ULTRA_BALL, MASTER_BALL
+-- 2) Capture chances per rarity and Poké Ball type
+-- BallCode must match ItemType.Code: POKE_BALL, GREAT_BALL, ULTRA_BALL, MASTER_BALL
 
 -- N
 INSERT INTO PokemonRarityCatchRates (PokemonRarityId, BallCode, CatchRatePercent) VALUES
@@ -56,4 +56,4 @@ INSERT INTO PokemonRarityCatchRates (PokemonRarityId, BallCode, CatchRatePercent
 (6, 'ULTRA_BALL',  60),
 (6, 'MASTER_BALL',100);
 
-ROLLBACK;
+COMMIT;

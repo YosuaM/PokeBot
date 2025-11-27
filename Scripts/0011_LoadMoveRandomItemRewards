@@ -1,0 +1,24 @@
+BEGIN TRANSACTION;
+
+-- Clear previous move-event rewards (optional)
+--DELETE FROM MoveRandomItemRewards;
+
+-- Poke Ball: 60% relative (Weight 60), fixed quantity 1
+INSERT INTO MoveRandomItemRewards (ItemTypeId, MinQuantity, MaxQuantity, Weight)
+SELECT Id, 5, 1, 60
+FROM ItemTypes
+WHERE Code = 'POKE_BALL';
+
+-- Great Ball: 30% relative (Weight 30), fixed quantity 1
+INSERT INTO MoveRandomItemRewards (ItemTypeId, MinQuantity, MaxQuantity, Weight)
+SELECT Id, 3, 1, 30
+FROM ItemTypes
+WHERE Code = 'GREAT_BALL';
+
+-- Ultra Ball: 10% relative (Weight 10), fixed quantity 1
+INSERT INTO MoveRandomItemRewards (ItemTypeId, MinQuantity, MaxQuantity, Weight)
+SELECT Id, 1, 1, 10
+FROM ItemTypes
+WHERE Code = 'ULTRA_BALL';
+
+ROLLBACK;

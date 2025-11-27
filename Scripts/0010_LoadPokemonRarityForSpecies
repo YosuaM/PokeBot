@@ -1,7 +1,7 @@
 BEGIN TRANSACTION;
 
--- Para cada especie, asignamos PokemonRarityId según el código de rareza del CSV
--- Formato:
+-- For each species, assign PokemonRarityId based on the rarity code from the CSV
+-- Format example:
 -- UPDATE PokemonSpecies
 -- SET PokemonRarityId = (SELECT Id FROM PokemonRarities WHERE Code = '<RARITY>')
 -- WHERE Id = <POKEDEX_ID>;
@@ -159,4 +159,4 @@ UPDATE PokemonSpecies SET PokemonRarityId = (SELECT Id FROM PokemonRarities WHER
 UPDATE PokemonSpecies SET PokemonRarityId = (SELECT Id FROM PokemonRarities WHERE Code = 'RL')  WHERE Id = 151;
 UPDATE PokemonSpecies SET PokemonRarityId = (SELECT Id FROM PokemonRarities WHERE Code = 'RL')  WHERE Id = 152;
 
-ROLLBACK;
+COMMIT;
