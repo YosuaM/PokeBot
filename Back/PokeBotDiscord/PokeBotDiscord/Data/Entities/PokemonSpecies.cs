@@ -16,10 +16,15 @@ public class PokemonSpecies
 
     public bool Enabled { get; set; } = true;
 
-    // Icon code
+    // Icon code (emoji)
     [MaxLength(50)]
     public string IconCode { get; set; } = string.Empty;
 
-    // Base capture chance in percent (0-100)
-    public int CaptureRate { get; set; } = 50;
+    // URL to a sprite image for this species
+    [MaxLength(200)]
+    public string SpriteUrl { get; set; } = string.Empty;
+
+    // Rarity reference (nullable during migration/initial data setup)
+    public int? PokemonRarityId { get; set; }
+    public PokemonRarity? Rarity { get; set; }
 }

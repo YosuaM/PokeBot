@@ -20,6 +20,8 @@ public class PokeBotDbContext : DbContext
     public DbSet<StoreType> StoreTypes { get; set; } = null!;
     public DbSet<StoreTypeItem> StoreTypeItems { get; set; } = null!;
     public DbSet<LocationStore> LocationStores { get; set; } = null!;
+    public DbSet<PokemonRarity> PokemonRarities { get; set; } = null!;
+    public DbSet<PokemonRarityCatchRate> PokemonRarityCatchRates { get; set; } = null!;
 
     public PokeBotDbContext(DbContextOptions<PokeBotDbContext> options) : base(options)
     {
@@ -162,6 +164,24 @@ public class PokeBotDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasIndex(pgb => new { pgb.PlayerId, pgb.GymId }).IsUnique();
+        });
+
+        modelBuilder.Entity<PokemonSpecies>(entity =>
+        {
+            entity.HasOne(ps => ps.Rarity)
+                .WithMany(r => r.Species)
+                .HasForeignKey(ps => ps.PokemonRarityId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PokemonRarityCatchRate>(entity =>
+        {
+            entity.HasOne(cr => cr.PokemonRarity)
+                .WithMany(r => r.CatchRates)
+                .HasForeignKey(cr => cr.PokemonRarityId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(cr => new { cr.PokemonRarityId, cr.BallCode }).IsUnique();
         });
 
         base.OnModelCreating(modelBuilder);

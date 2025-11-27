@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PokeBotDiscord.Data;
 
@@ -10,9 +11,11 @@ using PokeBotDiscord.Data;
 namespace PokeBotDiscord.Migrations
 {
     [DbContext(typeof(PokeBotDbContext))]
-    partial class PokeBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127041526_AddSpriteUrlToPokemonSpecies")]
+    partial class AddSpriteUrlToPokemonSpecies
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -333,57 +336,13 @@ namespace PokeBotDiscord.Migrations
                     b.ToTable("PokemonInstances");
                 });
 
-            modelBuilder.Entity("PokeBotDiscord.Data.Entities.PokemonRarity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("MaxMoneyReward")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MinMoneyReward")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PokemonRarities");
-                });
-
-            modelBuilder.Entity("PokeBotDiscord.Data.Entities.PokemonRarityCatchRate", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("BallCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("CatchRatePercent")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PokemonRarityId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PokemonRarityId", "BallCode")
-                        .IsUnique();
-
-                    b.ToTable("PokemonRarityCatchRates");
-                });
-
             modelBuilder.Entity("PokeBotDiscord.Data.Entities.PokemonSpecies", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CaptureRate")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Code")
@@ -402,17 +361,12 @@ namespace PokeBotDiscord.Migrations
                     b.Property<bool>("IsStarter")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("PokemonRarityId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("SpriteUrl")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PokemonRarityId");
 
                     b.ToTable("PokemonSpecies");
                 });
@@ -625,27 +579,6 @@ namespace PokeBotDiscord.Migrations
                     b.Navigation("Species");
                 });
 
-            modelBuilder.Entity("PokeBotDiscord.Data.Entities.PokemonRarityCatchRate", b =>
-                {
-                    b.HasOne("PokeBotDiscord.Data.Entities.PokemonRarity", "PokemonRarity")
-                        .WithMany("CatchRates")
-                        .HasForeignKey("PokemonRarityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PokemonRarity");
-                });
-
-            modelBuilder.Entity("PokeBotDiscord.Data.Entities.PokemonSpecies", b =>
-                {
-                    b.HasOne("PokeBotDiscord.Data.Entities.PokemonRarity", "Rarity")
-                        .WithMany("Species")
-                        .HasForeignKey("PokemonRarityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Rarity");
-                });
-
             modelBuilder.Entity("PokeBotDiscord.Data.Entities.StoreTypeItem", b =>
                 {
                     b.HasOne("PokeBotDiscord.Data.Entities.ItemType", "ItemType")
@@ -677,13 +610,6 @@ namespace PokeBotDiscord.Migrations
                     b.Navigation("Inventory");
 
                     b.Navigation("Party");
-                });
-
-            modelBuilder.Entity("PokeBotDiscord.Data.Entities.PokemonRarity", b =>
-                {
-                    b.Navigation("CatchRates");
-
-                    b.Navigation("Species");
                 });
 
             modelBuilder.Entity("PokeBotDiscord.Data.Entities.StoreType", b =>
