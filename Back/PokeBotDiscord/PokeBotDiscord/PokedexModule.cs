@@ -177,7 +177,10 @@ public class PokedexModule : InteractionModuleBase<SocketInteractionContext>
             .Distinct()
             .Count();
 
-        var title = _localizationService.GetString("Pokedex.Title", language);
+        var titleTemplate = _localizationService.GetString("Pokedex.Title", language);
+        var displayName = target.Username;
+        var title = string.Format(titleTemplate, displayName);
+
         var desc = string.Join("\n", entries);
 
         var footerFmt = _localizationService.GetString("Pokedex.Footer", language);
