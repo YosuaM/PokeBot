@@ -14,13 +14,15 @@ public class CatchModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly PokeBotDbContext _dbContext;
     private readonly ILocalizationService _localizationService;
+    private readonly ITutorialService _tutorialService;
 
     private static readonly ConcurrentDictionary<(ulong GuildId, ulong UserId), CancellationTokenSource> _catchTimeouts = new();
 
-    public CatchModule(PokeBotDbContext dbContext, ILocalizationService localizationService)
+    public CatchModule(PokeBotDbContext dbContext, ILocalizationService localizationService, ITutorialService tutorialService)
     {
         _dbContext = dbContext;
         _localizationService = localizationService;
+        _tutorialService = tutorialService;
     }
 
     [SlashCommand("catch", "Try to encounter a wild Pokémon in your current location")] 
@@ -435,6 +437,9 @@ public class CatchModule : InteractionModuleBase<SocketInteractionContext>
             }
 
             await _dbContext.SaveChangesAsync();
+
+            // Tutorial mission: any successful catch
+            await _tutorialService.CompleteMissionsAsync(guildId, ownerId, "CATCH_ANY_POKEMON");
 
             var caughtTemplate = _localizationService.GetString("Catch.Caught", language);
             description = string.Format(caughtTemplate, icon, species.Code, level);

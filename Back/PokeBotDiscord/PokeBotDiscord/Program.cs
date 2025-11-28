@@ -41,6 +41,7 @@ builder.Services.AddDbContext<PokeBotDbContext>(options =>
     options.UseSqlite(connectionString));
 
 builder.Services.AddScoped<ILocalizationService, LocalizationService>();
+builder.Services.AddScoped<ITutorialService, TutorialService>();
 
 builder.Services.AddSingleton(sp =>
 {

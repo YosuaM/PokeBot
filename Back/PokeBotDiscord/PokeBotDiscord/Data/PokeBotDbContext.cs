@@ -24,6 +24,11 @@ public class PokeBotDbContext : DbContext
     public DbSet<PokemonRarityCatchRate> PokemonRarityCatchRates { get; set; } = null!;
     public DbSet<MoveRandomItemReward> MoveRandomItemRewards { get; set; } = null!;
 
+    public DbSet<TutorialStep> TutorialSteps { get; set; } = null!;
+    public DbSet<TutorialMission> TutorialMissions { get; set; } = null!;
+    public DbSet<PlayerTutorialMissionProgress> PlayerTutorialMissionProgresses { get; set; } = null!;
+    public DbSet<PlayerTutorialStepProgress> PlayerTutorialStepProgresses { get; set; } = null!;
+
     public PokeBotDbContext(DbContextOptions<PokeBotDbContext> options) : base(options)
     {
     }
@@ -183,6 +188,50 @@ public class PokeBotDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(cr => new { cr.PokemonRarityId, cr.BallCode }).IsUnique();
+        });
+
+        modelBuilder.Entity<TutorialStep>(entity =>
+        {
+            entity.Property(ts => ts.Code).HasMaxLength(50);
+            entity.HasMany(ts => ts.Missions)
+                .WithOne(m => m.TutorialStep)
+                .HasForeignKey(m => m.TutorialStepId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TutorialMission>(entity =>
+        {
+            entity.Property(tm => tm.ConditionCode).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<PlayerTutorialMissionProgress>(entity =>
+        {
+            entity.HasOne(p => p.Player)
+                .WithMany()
+                .HasForeignKey(p => p.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(p => p.TutorialMission)
+                .WithMany(m => m.PlayerProgress)
+                .HasForeignKey(p => p.TutorialMissionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(p => new { p.PlayerId, p.TutorialMissionId }).IsUnique();
+        });
+
+        modelBuilder.Entity<PlayerTutorialStepProgress>(entity =>
+        {
+            entity.HasOne(p => p.Player)
+                .WithMany()
+                .HasForeignKey(p => p.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(p => p.TutorialStep)
+                .WithMany(ts => ts.PlayerProgress)
+                .HasForeignKey(p => p.TutorialStepId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(p => new { p.PlayerId, p.TutorialStepId }).IsUnique();
         });
 
         base.OnModelCreating(modelBuilder);

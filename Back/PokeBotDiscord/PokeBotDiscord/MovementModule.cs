@@ -13,13 +13,15 @@ public class MovementModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly PokeBotDbContext _dbContext;
     private readonly ILocalizationService _localizationService;
+    private readonly ITutorialService _tutorialService;
 
     private static readonly ConcurrentDictionary<(ulong GuildId, ulong UserId), CancellationTokenSource> _moveTimeouts = new();
 
-    public MovementModule(PokeBotDbContext dbContext, ILocalizationService localizationService)
+    public MovementModule(PokeBotDbContext dbContext, ILocalizationService localizationService, ITutorialService tutorialService)
     {
         _dbContext = dbContext;
         _localizationService = localizationService;
+        _tutorialService = tutorialService;
     }
 
     /// <summary>
@@ -305,6 +307,12 @@ public class MovementModule : InteractionModuleBase<SocketInteractionContext>
         var toLocalized = _localizationService.GetString(toKey, language);
         var toName = toLocalized == toKey ? toLocation.Code : toLocalized;
 
+        // Tutorial mission: MOVE_ROUTE1 (when reaching Route1 for the current user)
+        if (string.Equals(toLocation.Code, "Route1", StringComparison.OrdinalIgnoreCase))
+        {
+            await _tutorialService.CompleteMissionsAsync(guildId, userId, "MOVE_ROUTE1");
+        }
+
         var staminaAfter = player.CurrentStamina;
 
         var movedTitle = _localizationService.GetString("Move.MovedTitle", language);
@@ -344,7 +352,14 @@ public class MovementModule : InteractionModuleBase<SocketInteractionContext>
             announce += "\n" + string.Join("\n", lines);
         }
 
-        await FollowupAsync(announce, ephemeral: false);
+        // Send as an embed so it appears as a card similar to catch result
+        var publicEmbed = new EmbedBuilder()
+            .WithTitle(movedTitle)
+            .WithDescription(announce)
+            .WithColor(Color.Gold)
+            .Build();
+
+        await Context.Channel.SendMessageAsync(embed: publicEmbed);
     }
 
     private async Task<string?> TryTriggerMoveEventAsync(Player player, string language)

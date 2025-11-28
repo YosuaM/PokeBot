@@ -270,6 +270,24 @@ public class AdventureModule : InteractionModuleBase<SocketInteractionContext>
 
         player.Party.Add(starterInstance);
 
+        // Give initial Poké Balls to the new player so they can start catching Pokémon
+        var pokeBallType = await _dbContext.ItemTypes
+            .AsNoTracking()
+            .FirstOrDefaultAsync(it => it.Code == "POKE_BALL");
+
+        if (pokeBallType is not null)
+        {
+            var starterBalls = new InventoryItem
+            {
+                Owner = player,
+                ItemTypeId = pokeBallType.Id,
+                Quantity = 10
+            };
+
+            player.Inventory.Add(starterBalls);
+            _dbContext.InventoryItems.Add(starterBalls);
+        }
+
         _dbContext.Players.Add(player);
         await _dbContext.SaveChangesAsync();
 

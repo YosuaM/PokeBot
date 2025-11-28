@@ -11,11 +11,13 @@ public class ProfileModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly PokeBotDbContext _dbContext;
     private readonly ILocalizationService _localizationService;
+    private readonly ITutorialService _tutorialService;
 
-    public ProfileModule(PokeBotDbContext dbContext, ILocalizationService localizationService)
+    public ProfileModule(PokeBotDbContext dbContext, ILocalizationService localizationService, ITutorialService tutorialService)
     {
         _dbContext = dbContext;
         _localizationService = localizationService;
+        _tutorialService = tutorialService;
     }
 
     private async Task<bool> RegenerateStaminaAsync(Player player)
@@ -86,7 +88,7 @@ public class ProfileModule : InteractionModuleBase<SocketInteractionContext>
             .Include(p => p.Party)
             .Include(p => p.CurrentLocation)
             .Include(p => p.GymBadges)
-                .ThenInclude(b => b.Gym)
+            .ThenInclude(b => b.Gym)
             .FirstOrDefaultAsync(p => p.GuildId == guildId && p.DiscordUserId == userId);
 
         if (player is null)
@@ -99,6 +101,12 @@ public class ProfileModule : InteractionModuleBase<SocketInteractionContext>
         if (await RegenerateStaminaAsync(player))
         {
             await _dbContext.SaveChangesAsync();
+        }
+
+        // Tutorial: mission CMD_PROFILE (only when viewing own profile)
+        if (target.Id == Context.User.Id)
+        {
+            await _tutorialService.CompleteMissionsAsync(guildId, Context.User.Id, "CMD_PROFILE");
         }
 
         // Localized strings

@@ -7,10 +7,12 @@ namespace PokeBotDiscord;
 public class HelpModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly ILocalizationService _localizationService;
+    private readonly ITutorialService _tutorialService;
 
-    public HelpModule(ILocalizationService localizationService)
+    public HelpModule(ILocalizationService localizationService, ITutorialService tutorialService)
     {
         _localizationService = localizationService;
+        _tutorialService = tutorialService;
     }
 
     [SlashCommand("help", "Shows available commands")]
@@ -29,5 +31,10 @@ public class HelpModule : InteractionModuleBase<SocketInteractionContext>
             .Build();
 
         await RespondAsync(embed: embed, ephemeral: true);
+
+        if (guildId != 0)
+        {
+            await _tutorialService.CompleteMissionsAsync((ulong)guildId, Context.User.Id, "CMD_HELP");
+        }
     }
 }

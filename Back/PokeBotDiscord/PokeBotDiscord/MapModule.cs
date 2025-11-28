@@ -2,16 +2,19 @@ using System.IO;
 using Discord;
 using Discord.Interactions;
 using Microsoft.Extensions.Configuration;
+using PokeBotDiscord.Services;
 
 namespace PokeBotDiscord;
 
 public class MapModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IConfiguration _configuration;
+    private readonly ITutorialService _tutorialService;
 
-    public MapModule(IConfiguration configuration)
+    public MapModule(IConfiguration configuration, ITutorialService tutorialService)
     {
         _configuration = configuration;
+        _tutorialService = tutorialService;
     }
 
     [SlashCommand("map", "Show the Kanto region map")] 
@@ -50,5 +53,7 @@ public class MapModule : InteractionModuleBase<SocketInteractionContext>
         await using var stream = File.OpenRead(imagePath);
 
         await RespondWithFileAsync(stream, fileName, embed: embed);
+
+        await _tutorialService.CompleteMissionsAsync(Context.Guild.Id, Context.User.Id, "CMD_MAP");
     }
 }

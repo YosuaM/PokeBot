@@ -12,6 +12,7 @@ public class PokedexModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly PokeBotDbContext _dbContext;
     private readonly ILocalizationService _localizationService;
+    private readonly ITutorialService _tutorialService;
 
     private const int PageSize = 20;
 
@@ -19,10 +20,11 @@ public class PokedexModule : InteractionModuleBase<SocketInteractionContext>
     private const int FilterSeen = 1;
     private const int FilterOwned = 2;
 
-    public PokedexModule(PokeBotDbContext dbContext, ILocalizationService localizationService)
+    public PokedexModule(PokeBotDbContext dbContext, ILocalizationService localizationService, ITutorialService tutorialService)
     {
         _dbContext = dbContext;
         _localizationService = localizationService;
+        _tutorialService = tutorialService;
     }
 
     [SlashCommand("pokedex", "Shows a player's Pokédex for this server")] 
@@ -58,6 +60,21 @@ public class PokedexModule : InteractionModuleBase<SocketInteractionContext>
             var notFound = _localizationService.GetString("Profile.TrainerNotFound", language);
             await RespondAsync(notFound, ephemeral: true);
             return;
+        }
+
+        // Tutorial mission: POKEDEX_5_AND_CMD (only when viewing own Pokédex)
+        if (target.Id == Context.User.Id)
+        {
+            var unlockedCount = await _dbContext.Set<PokemonInstance>()
+                .Where(pi => pi.PlayerId == player.Id && pi.Level >= 0)
+                .Select(pi => pi.PokemonSpeciesId)
+                .Distinct()
+                .CountAsync();
+
+            if (unlockedCount >= 5)
+            {
+                await _tutorialService.CompleteMissionsAsync(guildId, Context.User.Id, "POKEDEX_5_AND_CMD");
+            }
         }
 
         await RespondWithPokedexPageAsync(target, player, 0, FilterAll, language, ownerId: Context.User.Id);
