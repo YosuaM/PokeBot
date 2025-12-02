@@ -77,10 +77,12 @@ public class CatchModule : InteractionModuleBase<SocketInteractionContext>
             return;
         }
 
-        // Load encounter table for this location
+        // Load encounter table for this location (only normal encounters)
         var encounters = await _dbContext.Set<PokemonEncounter>()
             .Include(e => e.Species)
-            .Where(e => e.LocationId == location.Id && e.Species.Enabled)
+            .Where(e => e.LocationId == location.Id
+                     && e.EncounterMethodId == (int)PokemonEncounterMethod.Normal
+                     && e.Species.Enabled)
             .ToListAsync();
 
         if (encounters.Count == 0)
@@ -126,6 +128,9 @@ public class CatchModule : InteractionModuleBase<SocketInteractionContext>
         var existingDexEntry = await _dbContext.Set<PokemonInstance>()
             .FirstOrDefaultAsync(pi => pi.PlayerId == player.Id && pi.PokemonSpeciesId == species.Id);
 
+        // A species is considered "owned" when the player has it at level >= 1
+        var alreadyOwned = existingDexEntry is not null && existingDexEntry.Level >= 1;
+
         if (existingDexEntry is null)
         {
             var dexEntry = new PokemonInstance
@@ -140,10 +145,6 @@ public class CatchModule : InteractionModuleBase<SocketInteractionContext>
             await _dbContext.SaveChangesAsync();
         }
 
-        var title = _localizationService.GetString("Catch.Title", language);
-        var appearedTemplate = _localizationService.GetString("Catch.Appeared", language);
-        var appeared = string.Format(appearedTemplate, icon, species.Code, level);
-
         var ownerId = Context.User.Id;
 
         var ballCodes = new[] { "POKE_BALL", "GREAT_BALL", "ULTRA_BALL", "MASTER_BALL" };
@@ -156,6 +157,18 @@ public class CatchModule : InteractionModuleBase<SocketInteractionContext>
         var ballItemTypes = await _dbContext.ItemTypes
             .Where(it => ballCodes.Contains(it.Code))
             .ToListAsync();
+
+        var title = _localizationService.GetString("Catch.Title", language);
+        var appearedTemplate = _localizationService.GetString("Catch.Appeared", language);
+
+        // Use the same custom emoji as the normal Poké Ball item when the species is already owned
+        var normalBallIcon = ballItemTypes.FirstOrDefault(it => it.Code == "POKE_BALL")?.IconCode;
+        var ownedEmoji = alreadyOwned && !string.IsNullOrWhiteSpace(normalBallIcon)
+            ? $" {normalBallIcon}"
+            : string.Empty;
+
+        // First build the standard appeared line, then append the Poké Ball emoji at the end (after the level)
+        var appeared = string.Format(appearedTemplate, icon, species.Code, level) + ownedEmoji;
 
         // Load capture rates for this species rarity (if defined)
         var captureRatesByBall = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
@@ -327,6 +340,317 @@ public class CatchModule : InteractionModuleBase<SocketInteractionContext>
                 }
             }
         }, token);
+    }
+
+    [SlashCommand("fish", "Try to fish for a wild Pokémon in your current location")] 
+    public async Task FishAsync()
+    {
+        if (Context.Guild is null)
+        {
+            var msg = _localizationService.GetString("Adventure.ForGuildOnly", "en");
+            await RespondAsync(msg, ephemeral: true);
+            return;
+        }
+
+        var guildId = Context.Guild.Id;
+        var userId = Context.User.Id;
+        var language = _localizationService.GetGuildLanguage(guildId);
+
+        var player = await _dbContext.Players
+            .Include(p => p.CurrentLocation)
+                .ThenInclude(l => l.LocationType)
+            .Include(p => p.Inventory)
+                .ThenInclude(ii => ii.ItemType)
+            .FirstOrDefaultAsync(p => p.GuildId == guildId && p.DiscordUserId == userId);
+
+        if (player is null)
+        {
+            var mustStart = _localizationService.GetString("Adventure.MustStartFirst", language);
+            await RespondAsync(mustStart, ephemeral: true);
+            return;
+        }
+
+        var location = player.CurrentLocation;
+        if (location is null || !location.Enabled || location.Hidden)
+        {
+            var cannotEncounter = _localizationService.GetString("Catch.NoEncountersHere", language);
+            await RespondAsync(cannotEncounter, ephemeral: true);
+            return;
+        }
+
+        // For fishing we do not rely on LocationType.HasWildEncounters; instead we check if there are fishing encounters defined.
+
+        // Check stamina before allowing the fishing attempt
+        if (player.CurrentStamina <= 0)
+        {
+            var noStamina = _localizationService.GetString("Move.NoStamina", language);
+            await RespondAsync(noStamina, ephemeral: true);
+            return;
+        }
+
+        // Load encounter table for this location (only fishing encounters)
+        var encounters = await _dbContext.Set<PokemonEncounter>()
+            .Include(e => e.Species)
+            .Where(e => e.LocationId == location.Id
+                     && e.EncounterMethodId == (int)PokemonEncounterMethod.Fishing
+                     && e.Species.Enabled)
+            .ToListAsync();
+
+        if (encounters.Count == 0)
+        {
+            var noneHere = _localizationService.GetString("Catch.NoEncountersDefined", language);
+            await RespondAsync(noneHere, ephemeral: true);
+            return;
+        }
+
+        // Consume 1 stamina for this fishing action now that we know an encounter table exists
+        if (player.CurrentStamina > 0)
+        {
+            player.CurrentStamina -= 1;
+            await _dbContext.SaveChangesAsync();
+        }
+
+        // Weighted random selection by Weight
+        var totalWeight = encounters.Sum(e => Math.Max(1, e.Weight));
+        var roll = Random.Shared.Next(1, totalWeight + 1);
+        PokemonEncounter? picked = null;
+        var cumulative = 0;
+        foreach (var e in encounters)
+        {
+            cumulative += Math.Max(1, e.Weight);
+            if (roll <= cumulative)
+            {
+                picked = e;
+                break;
+            }
+        }
+
+        picked ??= encounters.Last();
+
+        // Determine encounter level within [MinLevel, MaxLevel]
+        var minLevel = Math.Max(1, picked.MinLevel);
+        var maxLevel = Math.Max(minLevel, picked.MaxLevel);
+        var level = Random.Shared.Next(minLevel, maxLevel + 1);
+
+        var species = picked.Species;
+        var icon = string.IsNullOrWhiteSpace(species.IconCode) ? string.Empty : species.IconCode + " ";
+
+        // Register species in Pokédex if this is the first time the player sees it
+        var existingDexEntry = await _dbContext.Set<PokemonInstance>()
+            .FirstOrDefaultAsync(pi => pi.PlayerId == player.Id && pi.PokemonSpeciesId == species.Id);
+
+        // A species is considered "owned" when the player has it at level >= 1
+        var alreadyOwned = existingDexEntry is not null && existingDexEntry.Level >= 1;
+
+        if (existingDexEntry is null)
+        {
+            var dexEntry = new PokemonInstance
+            {
+                PlayerId = player.Id,
+                PokemonSpeciesId = species.Id,
+                Level = 0,
+                InParty = false
+            };
+
+            _dbContext.Add(dexEntry);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        var ownerId = Context.User.Id;
+
+        var ballCodes = new[] { "POKE_BALL", "GREAT_BALL", "ULTRA_BALL", "MASTER_BALL" };
+        var inventoryBalls = player.Inventory
+            .Where(ii => ballCodes.Contains(ii.ItemType.Code))
+            .ToList();
+
+        // Load item type metadata (icons) for all ball types so we always have emojis,
+        // even if the player has 0 units of a given ball type.
+        var ballItemTypes = await _dbContext.ItemTypes
+            .Where(it => ballCodes.Contains(it.Code))
+            .ToListAsync();
+
+        var title = _localizationService.GetString("Catch.Title", language);
+        var appearedTemplate = _localizationService.GetString("Catch.Appeared", language);
+
+        // Use the same custom emoji as the normal Poké Ball item when the species is already owned
+        var normalBallIcon = ballItemTypes.FirstOrDefault(it => it.Code == "POKE_BALL")?.IconCode;
+        var ownedEmoji = alreadyOwned && !string.IsNullOrWhiteSpace(normalBallIcon)
+            ? $" {normalBallIcon}"
+            : string.Empty;
+
+        // First build the standard appeared line, then append the Poké Ball emoji at the end (after the level)
+        var appeared = string.Format(appearedTemplate, icon, species.Code, level) + ownedEmoji;
+
+        // Load capture rates for this species rarity (if defined)
+        var captureRatesByBall = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        if (species.PokemonRarityId.HasValue)
+        {
+            var rarityRates = await _dbContext.Set<PokemonRarityCatchRate>()
+                .Where(cr => cr.PokemonRarityId == species.PokemonRarityId.Value && ballCodes.Contains(cr.BallCode))
+                .ToListAsync();
+
+            foreach (var cr in rarityRates)
+            {
+                captureRatesByBall[cr.BallCode] = cr.CatchRatePercent;
+            }
+        }
+
+        var inventoryHeader = _localizationService.GetString("Catch.InventoryHeader", language);
+        var ballLineTemplate = _localizationService.GetString("Catch.BallButtonLabel", language);
+        var captureHeader = _localizationService.GetString("Catch.CaptureRatesHeader", language);
+        var captureLineTemplate = _localizationService.GetString("Catch.CaptureRateLine", language);
+        var actionPrompt = _localizationService.GetString("Catch.ActionPrompt", language);
+
+        var fleeLabel = _localizationService.GetString("Catch.FleeLabel", language);
+
+        var builder = new ComponentBuilder();
+
+        var inventoryLines = new List<string>();
+        var captureLines = new List<string>();
+
+        foreach (var code in ballCodes)
+        {
+            var invItem = inventoryBalls.FirstOrDefault(ii => ii.ItemType.Code == code);
+            var quantity = invItem?.Quantity ?? 0;
+
+            var ballType = ballItemTypes.FirstOrDefault(it => it.Code == code);
+            var itemIcon = ballType?.IconCode ?? string.Empty;
+
+            // Build inventory line
+            var nameKey = $"Item.{code}.Name";
+            var localizedName = _localizationService.GetString(nameKey, language);
+            var name = string.IsNullOrEmpty(localizedName) || localizedName == nameKey ? code : localizedName;
+            var invLine = string.Format(ballLineTemplate, itemIcon, name, quantity);
+            inventoryLines.Add(invLine);
+
+            // Build capture rate line (if available)
+            if (captureRatesByBall.TryGetValue(code, out var percent))
+            {
+                var captureLine = string.Format(captureLineTemplate, itemIcon, name, percent);
+                captureLines.Add(captureLine);
+            }
+
+            if (!string.IsNullOrWhiteSpace(itemIcon) && Emote.TryParse(itemIcon, out var emote))
+            {
+                // Label must not be empty; use zero-width space so only the emoji is visible
+                builder.WithButton(
+                    label: "\u200B",
+                    customId: $"catch_attempt:{species.Id}:{level}:{ownerId}:{code}",
+                    style: ButtonStyle.Primary,
+                    emote: emote,
+                    disabled: quantity <= 0,
+                    row: 0);
+            }
+            else
+            {
+                // Fallback text label when we don't have a valid emoji
+                builder.WithButton(
+                    label: name,
+                    customId: $"catch_attempt:{species.Id}:{level}:{ownerId}:{code}",
+                    style: ButtonStyle.Primary,
+                    disabled: quantity <= 0,
+                    row: 0);
+            }
+        }
+
+        // Fight button (placeholder for future combat system) on second row
+        var fightLabel = _localizationService.GetString("Catch.FightLabel", language);
+        builder.WithButton(fightLabel, $"catch_fight:{species.Id}:{level}:{ownerId}", ButtonStyle.Secondary, row: 1);
+
+        // Flee button on second row
+        builder.WithButton(fleeLabel, $"catch_flee:{species.Id}:{level}:{ownerId}", ButtonStyle.Danger, row: 1);
+
+        // Build description with Pokémon info + inventory + action prompt
+        var descriptionBuilder = new StringBuilder();
+        descriptionBuilder.AppendLine(appeared);
+        descriptionBuilder.AppendLine();
+        descriptionBuilder.AppendLine(inventoryHeader);
+        foreach (var line in inventoryLines)
+        {
+            descriptionBuilder.AppendLine(line);
+        }
+        descriptionBuilder.AppendLine();
+
+        if (captureLines.Count > 0)
+        {
+            descriptionBuilder.AppendLine(captureHeader);
+            foreach (var line in captureLines)
+            {
+                descriptionBuilder.AppendLine(line);
+            }
+            descriptionBuilder.AppendLine();
+        }
+
+        descriptionBuilder.AppendLine(actionPrompt);
+
+        var embedBuilder = new EmbedBuilder()
+            .WithTitle(title)
+            .WithDescription(descriptionBuilder.ToString())
+            .WithColor(Color.DarkGreen);
+
+        // If a sprite URL is defined for this species, show it as thumbnail
+        if (!string.IsNullOrWhiteSpace(species.SpriteUrl))
+        {
+            embedBuilder.WithThumbnailUrl(species.SpriteUrl);
+        }
+
+        var embed = embedBuilder.Build();
+
+        var components = builder.Build();
+
+        await RespondAsync(embed: embed, components: components, ephemeral: false);
+
+        // Schedule timeout to disable the catch button after 1 minute
+        var key2 = (GuildId: guildId, UserId: ownerId);
+        if (_catchTimeouts.TryRemove(key2, out var oldCts2))
+        {
+            oldCts2.Cancel();
+            oldCts2.Dispose();
+        }
+
+        var cts2 = new CancellationTokenSource();
+        _catchTimeouts[key2] = cts2;
+        var token2 = cts2.Token;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(TimeSpan.FromMinutes(1), token2);
+
+                if (token2.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                var expiredTitle = _localizationService.GetString("Catch.ExpiredTitle", language);
+                var expiredTemplate = _localizationService.GetString("Catch.ExpiredBody", language);
+                var expiredBody = string.Format(expiredTemplate, icon, species.Code, level);
+
+                await Context.Interaction.ModifyOriginalResponseAsync(msg =>
+                {
+                    msg.Embed = new EmbedBuilder()
+                        .WithTitle(expiredTitle)
+                        .WithDescription(expiredBody)
+                        .WithColor(Color.DarkGrey)
+                        .Build();
+                    msg.Components = new ComponentBuilder().Build();
+                });
+            }
+            catch (TaskCanceledException)
+            {
+            }
+            catch
+            {
+            }
+            finally
+            {
+                if (_catchTimeouts.TryRemove(key2, out var toDispose2))
+                {
+                    toDispose2.Dispose();
+                }
+            }
+        }, token2);
     }
 
     [ComponentInteraction("catch_attempt:*:*:*:*")]

@@ -1,5 +1,11 @@
 namespace PokeBotDiscord.Data.Entities;
 
+public enum PokemonEncounterMethod
+{
+    Normal = 1,
+    Fishing = 2
+}
+
 public class PokemonEncounter
 {
     public int Id { get; set; }
@@ -16,4 +22,7 @@ public class PokemonEncounter
     // Optional level range for wild encounters
     public int MinLevel { get; set; } = 1;
     public int MaxLevel { get; set; } = 1;
+
+    // Encounter method (Normal = 1, Fishing = 2, Surf = 3, Diving = 4, ...)
+    public int EncounterMethodId { get; set; } = (int)PokemonEncounterMethod.Normal;
 }

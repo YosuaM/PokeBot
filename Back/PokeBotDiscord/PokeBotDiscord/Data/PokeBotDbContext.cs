@@ -182,6 +182,9 @@ public class PokeBotDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.LocationId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(e => e.EncounterMethodId)
+                .HasDefaultValue((int)PokemonEncounterMethod.Normal);
         });
 
         modelBuilder.Entity<PlayerGymBadge>(entity =>
