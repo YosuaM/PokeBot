@@ -7,7 +7,7 @@ public class GymTrainer
     public int Id { get; set; }
 
     // Gym this trainer belongs to
-    public int? GymId { get; set; }
+    public int GymId { get; set; }
     public Gym Gym { get; set; } = null!;
 
     [MaxLength(100)]
