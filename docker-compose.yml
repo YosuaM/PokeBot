@@ -8,6 +8,10 @@ services:
     volumes:
       # Persist SQLite DB
       - ./data:/app/data
+    entrypoint: ["sh", "-c"]
+    command: >
+      chmod -R 777 /app/data &&
+      dotnet PokeBotDiscord.dll
     # logging basic rotation
     logging:
       driver: "json-file"
