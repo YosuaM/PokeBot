@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PokeBotDiscord.Data;
 
@@ -10,9 +11,11 @@ using PokeBotDiscord.Data;
 namespace PokeBotDiscord.Migrations
 {
     [DbContext(typeof(PokeBotDbContext))]
-    partial class PokeBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251128220621_AddGymConfiguration")]
+    partial class AddGymConfiguration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -390,34 +393,6 @@ namespace PokeBotDiscord.Migrations
                         .IsUnique();
 
                     b.ToTable("PlayerGymBadges");
-                });
-
-            modelBuilder.Entity("PokeBotDiscord.Data.Entities.PlayerGymTrainerProgress", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("Defeated")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("FirstDefeatedAtUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("GymTrainerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GymTrainerId");
-
-                    b.HasIndex("PlayerId", "GymTrainerId")
-                        .IsUnique();
-
-                    b.ToTable("PlayerGymTrainerProgresses");
                 });
 
             modelBuilder.Entity("PokeBotDiscord.Data.Entities.PlayerTutorialMissionProgress", b =>
@@ -887,25 +862,6 @@ namespace PokeBotDiscord.Migrations
                         .IsRequired();
 
                     b.Navigation("Gym");
-
-                    b.Navigation("Player");
-                });
-
-            modelBuilder.Entity("PokeBotDiscord.Data.Entities.PlayerGymTrainerProgress", b =>
-                {
-                    b.HasOne("PokeBotDiscord.Data.Entities.GymTrainer", "GymTrainer")
-                        .WithMany()
-                        .HasForeignKey("GymTrainerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PokeBotDiscord.Data.Entities.Player", "Player")
-                        .WithMany()
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GymTrainer");
 
                     b.Navigation("Player");
                 });

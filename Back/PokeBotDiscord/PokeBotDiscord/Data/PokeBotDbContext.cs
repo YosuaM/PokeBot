@@ -13,9 +13,11 @@ public class PokeBotDbContext : DbContext
     public DbSet<PokemonSpecies> PokemonSpecies { get; set; } = null!;
     public DbSet<LocationType> LocationTypes { get; set; } = null!;
     public DbSet<Gym> Gyms { get; set; } = null!;
+    public DbSet<GymTrainer> GymTrainers { get; set; } = null!;
     public DbSet<ItemType> ItemTypes { get; set; } = null!;
     public DbSet<LocationConnection> LocationConnections { get; set; } = null!;
     public DbSet<PlayerGymBadge> PlayerGymBadges { get; set; } = null!;
+    public DbSet<PlayerGymTrainerProgress> PlayerGymTrainerProgresses { get; set; } = null!;
     public DbSet<PokemonEncounter> PokemonEncounters { get; set; } = null!;
     public DbSet<StoreType> StoreTypes { get; set; } = null!;
     public DbSet<StoreTypeItem> StoreTypeItems { get; set; } = null!;
@@ -108,6 +110,31 @@ public class PokeBotDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
+        modelBuilder.Entity<Gym>(entity =>
+        {
+            entity.Property(g => g.Code).HasMaxLength(50);
+
+            entity.HasOne(g => g.Location)
+                .WithMany()
+                .HasForeignKey(g => g.LocationId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<GymTrainer>(entity =>
+        {
+            entity.Property(gt => gt.Name).HasMaxLength(100);
+
+            entity.HasOne(gt => gt.Gym)
+                .WithMany(g => g.Trainers)
+                .HasForeignKey(gt => gt.GymId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(gt => gt.RewardItemType)
+                .WithMany()
+                .HasForeignKey(gt => gt.RewardItemTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         modelBuilder.Entity<StoreType>(entity =>
         {
             entity.Property(st => st.Code).HasMaxLength(50);
@@ -170,6 +197,21 @@ public class PokeBotDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasIndex(pgb => new { pgb.PlayerId, pgb.GymId }).IsUnique();
+        });
+
+        modelBuilder.Entity<PlayerGymTrainerProgress>(entity =>
+        {
+            entity.HasOne(p => p.Player)
+                .WithMany()
+                .HasForeignKey(p => p.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(p => p.GymTrainer)
+                .WithMany()
+                .HasForeignKey(p => p.GymTrainerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(p => new { p.PlayerId, p.GymTrainerId }).IsUnique();
         });
 
         modelBuilder.Entity<PokemonSpecies>(entity =>
