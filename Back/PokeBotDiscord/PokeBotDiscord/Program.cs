@@ -63,5 +63,4 @@ builder.Services.AddSingleton(sp =>
 builder.Services.AddHostedService<DiscordBotService>();
 
 var host = builder.Build();
-
 await host.RunAsync();

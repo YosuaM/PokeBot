@@ -1,0 +1,197 @@
+-- BASIC TYPES
+INSERT INTO PokemonTypes (Id, Code, Name) VALUES
+(1,  'NORMAL',  'Normal'),
+(2,  'FIRE',    'Fire'),
+(3,  'WATER',   'Water'),
+(4,  'GRASS',   'Grass'),
+(5,  'ELECTRIC','Electric'),
+(6,  'ICE',     'Ice'),
+(7,  'FIGHTING','Fighting'),
+(8,  'POISON',  'Poison'),
+(9,  'GROUND',  'Ground'),
+(10, 'FLYING',  'Flying'),
+(11, 'PSYCHIC', 'Psychic'),
+(12, 'BUG',     'Bug'),
+(13, 'ROCK',    'Rock'),
+(14, 'GHOST',   'Ghost'),
+(15, 'DRAGON',  'Dragon'),
+(16, 'DARK',    'Dark'),
+(17, 'STEEL',   'Steel'),
+(18, 'FAIRY',   'Fairy');
+
+-- EFFECTIVENESS
+-- Not defined configurations means x1.0
+
+-- Normal
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(1, 13, 0.5),   -- Normal -> Rock
+(1, 17, 0.5),   -- Normal -> Steel
+(1, 14, 0.0);   -- Normal -> Ghost
+
+-- Fire
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(2,  4, 2.0),   -- Fire -> Grass
+(2,  6, 2.0),   -- Fire -> Ice
+(2, 12, 2.0),   -- Fire -> Bug
+(2, 17, 2.0),   -- Fire -> Steel
+(2,  2, 0.5),   -- Fire -> Fire
+(2,  3, 0.5),   -- Fire -> Water
+(2, 13, 0.5),   -- Fire -> Rock
+(2, 15, 0.5);   -- Fire -> Dragon
+
+-- Water
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(3,  2, 2.0),   -- Water -> Fire
+(3,  9, 2.0),   -- Water -> Ground
+(3, 13, 2.0),   -- Water -> Rock
+(3,  3, 0.5),   -- Water -> Water
+(3,  4, 0.5),   -- Water -> Grass
+(3, 15, 0.5);   -- Water -> Dragon
+
+-- Grass
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(4,  3, 2.0),   -- Grass -> Water
+(4,  9, 2.0),   -- Grass -> Ground
+(4, 13, 2.0),   -- Grass -> Rock
+(4,  2, 0.5),   -- Grass -> Fire
+(4,  4, 0.5),   -- Grass -> Grass
+(4,  8, 0.5),   -- Grass -> Poison
+(4, 10, 0.5),   -- Grass -> Flying
+(4, 12, 0.5),   -- Grass -> Bug
+(4, 15, 0.5),   -- Grass -> Dragon
+(4, 17, 0.5);   -- Grass -> Steel
+
+-- Electric
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(5,  3, 2.0),   -- Electric -> Water
+(5, 10, 2.0),   -- Electric -> Flying
+(5,  4, 0.5),   -- Electric -> Grass
+(5,  5, 0.5),   -- Electric -> Electric
+(5, 15, 0.5),   -- Electric -> Dragon
+(5,  9, 0.0);   -- Electric -> Ground
+
+-- Ice
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(6,  4, 2.0),   -- Ice -> Grass
+(6,  9, 2.0),   -- Ice -> Ground
+(6, 10, 2.0),   -- Ice -> Flying
+(6, 15, 2.0),   -- Ice -> Dragon
+(6,  2, 0.5),   -- Ice -> Fire
+(6,  3, 0.5),   -- Ice -> Water
+(6,  6, 0.5),   -- Ice -> Ice
+(6, 17, 0.5);   -- Ice -> Steel
+
+-- Fighting
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(7,  1, 2.0),   -- Fighting -> Normal
+(7,  6, 2.0),   -- Fighting -> Ice
+(7, 13, 2.0),   -- Fighting -> Rock
+(7, 16, 2.0),   -- Fighting -> Dark
+(7, 17, 2.0),   -- Fighting -> Steel
+(7,  8, 0.5),   -- Fighting -> Poison
+(7, 10, 0.5),   -- Fighting -> Flying
+(7, 11, 0.5),   -- Fighting -> Psychic
+(7, 12, 0.5),   -- Fighting -> Bug
+(7, 18, 0.5),   -- Fighting -> Fairy
+(7, 14, 0.0);   -- Fighting -> Ghost
+
+-- Poison
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(8,  4, 2.0),   -- Poison -> Grass
+(8, 18, 2.0),   -- Poison -> Fairy
+(8,  8, 0.5),   -- Poison -> Poison
+(8,  9, 0.5),   -- Poison -> Ground
+(8, 13, 0.5),   -- Poison -> Rock
+(8, 14, 0.5),   -- Poison -> Ghost
+(8, 17, 0.0);   -- Poison -> Steel
+
+-- Ground
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(9,  2, 2.0),   -- Ground -> Fire
+(9,  5, 2.0),   -- Ground -> Electric
+(9,  8, 2.0),   -- Ground -> Poison
+(9, 13, 2.0),   -- Ground -> Rock
+(9, 17, 2.0),   -- Ground -> Steel
+(9,  4, 0.5),   -- Ground -> Grass
+(9, 12, 0.5),   -- Ground -> Bug
+(9, 10, 0.0);   -- Ground -> Flying
+
+-- Flying
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(10, 4, 2.0),   -- Flying -> Grass
+(10, 7, 2.0),   -- Flying -> Fighting
+(10, 12,2.0),   -- Flying -> Bug
+(10, 5, 0.5),   -- Flying -> Electric
+(10, 13,0.5),   -- Flying -> Rock
+(10, 17,0.5);   -- Flying -> Steel
+
+-- Psychic
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(11, 7, 2.0),   -- Psychic -> Fighting
+(11, 8, 2.0),   -- Psychic -> Poison
+(11,11, 0.5),   -- Psychic -> Psychic
+(11,17, 0.5),   -- Psychic -> Steel
+(11,16, 0.0);   -- Psychic -> Dark
+
+-- Bug
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(12, 4, 2.0),   -- Bug -> Grass
+(12,11, 2.0),   -- Bug -> Psychic
+(12,16, 2.0),   -- Bug -> Dark
+(12, 2, 0.5),   -- Bug -> Fire
+(12, 7, 0.5),   -- Bug -> Fighting
+(12, 8, 0.5),   -- Bug -> Poison
+(12,10, 0.5),   -- Bug -> Flying
+(12,14, 0.5),   -- Bug -> Ghost
+(12,17, 0.5),   -- Bug -> Steel
+(12,18, 0.5);   -- Bug -> Fairy
+
+-- Rock
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(13, 2, 2.0),   -- Rock -> Fire
+(13, 6, 2.0),   -- Rock -> Ice
+(13,10, 2.0),   -- Rock -> Flying
+(13,12, 2.0),   -- Rock -> Bug
+(13, 7, 0.5),   -- Rock -> Fighting
+(13, 9, 0.5),   -- Rock -> Ground
+(13,17, 0.5);   -- Rock -> Steel
+
+-- Ghost
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(14,14, 2.0),   -- Ghost -> Ghost
+(14,11, 2.0),   -- Ghost -> Psychic
+(14,16, 0.5),   -- Ghost -> Dark
+(14, 1, 0.0);   -- Ghost -> Normal
+
+-- Dragon
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(15,15, 2.0),   -- Dragon -> Dragon
+(15,17, 0.5),   -- Dragon -> Steel
+(15,18, 0.0);   -- Dragon -> Fairy
+
+-- Dark
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(16,14, 2.0),   -- Dark -> Ghost
+(16,11, 2.0),   -- Dark -> Psychic
+(16, 7, 0.5),   -- Dark -> Fighting
+(16,16, 0.5),   -- Dark -> Dark
+(16,18, 0.5);   -- Dark -> Fairy
+
+-- Steel
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(17, 6, 2.0),   -- Steel -> Ice
+(17,13, 2.0),   -- Steel -> Rock
+(17,18, 2.0),   -- Steel -> Fairy
+(17, 2, 0.5),   -- Steel -> Fire
+(17, 3, 0.5),   -- Steel -> Water
+(17, 5, 0.5),   -- Steel -> Electric
+(17,17, 0.5);   -- Steel -> Steel
+
+-- Fairy
+INSERT INTO PokemonTypeEffectiveness (AttackerTypeId, DefenderTypeId, Multiplier) VALUES
+(18, 7, 2.0),   -- Fairy -> Fighting
+(18,15, 2.0),   -- Fairy -> Dragon
+(18,16, 2.0),   -- Fairy -> Dark
+(18, 2, 0.5),   -- Fairy -> Fire
+(18, 8, 0.5),   -- Fairy -> Poison
+(18,17, 0.5);   -- Fairy -> Steel

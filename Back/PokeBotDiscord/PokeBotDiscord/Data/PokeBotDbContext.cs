@@ -11,6 +11,9 @@ public class PokeBotDbContext : DbContext
     public DbSet<InventoryItem> InventoryItems { get; set; } = null!;
     public DbSet<Location> Locations { get; set; } = null!;
     public DbSet<PokemonSpecies> PokemonSpecies { get; set; } = null!;
+    public DbSet<PokemonType> PokemonTypes { get; set; } = null!;
+    public DbSet<PokemonSpeciesType> PokemonSpeciesTypes { get; set; } = null!;
+    public DbSet<PokemonTypeEffectiveness> PokemonTypeEffectiveness { get; set; } = null!;
     public DbSet<LocationType> LocationTypes { get; set; } = null!;
     public DbSet<Gym> Gyms { get; set; } = null!;
     public DbSet<GymTrainer> GymTrainers { get; set; } = null!;
@@ -233,6 +236,36 @@ public class PokeBotDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(cr => new { cr.PokemonRarityId, cr.BallCode }).IsUnique();
+        });
+
+        modelBuilder.Entity<PokemonSpeciesType>(entity =>
+        {
+            entity.HasOne(pst => pst.Species)
+                .WithMany()
+                .HasForeignKey(pst => pst.PokemonSpeciesId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(pst => pst.Type)
+                .WithMany(t => t.SpeciesTypes)
+                .HasForeignKey(pst => pst.PokemonTypeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(pst => new { pst.PokemonSpeciesId, pst.PokemonTypeId }).IsUnique();
+        });
+
+        modelBuilder.Entity<PokemonTypeEffectiveness>(entity =>
+        {
+            entity.HasOne(e => e.AttackerType)
+                .WithMany(t => t.AttackingEffectiveness)
+                .HasForeignKey(e => e.AttackerTypeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.DefenderType)
+                .WithMany(t => t.DefendingEffectiveness)
+                .HasForeignKey(e => e.DefenderTypeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => new { e.AttackerTypeId, e.DefenderTypeId }).IsUnique();
         });
 
         modelBuilder.Entity<TutorialStep>(entity =>
